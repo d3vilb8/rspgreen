@@ -3,20 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
-use App\Models\TaskStatus;
+use App\Models\Team;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Project;
 use App\Models\Employee;
 use App\Models\TaskAssign;
+use App\Models\TaskStatus;
 use App\Models\TaskCategory;
 use Illuminate\Http\Request;
 use App\Models\ProjectAssign;
-use App\Models\Team;
-use App\Notifications\TaskAssign as NotificationsTaskAssign;
-use Illuminate\Support\Facades\Auth;
+use App\Models\StageOfProject;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use App\Notifications\TaskAssign as NotificationsTaskAssign;
 
 class ProjectController extends Controller
 {
@@ -230,6 +231,8 @@ class ProjectController extends Controller
         $taskcategory = TaskCategory::all();
         $employees = User::role('Employee')->get();
         $tls = User::role('Team Leader')->get();
+        $stages = StageOfProject::all();
+        // dd($stages);
         $userss = Auth::user();
         $user = Auth::user()->name;
         if ($userss) {
@@ -238,7 +241,7 @@ class ProjectController extends Controller
             // dd($permissions);
         }
         $notif = Auth::user()->notifications;
-        return Inertia::render('projects/task-create', compact('tls','employees', 'projects', 'taskcategory', 'user', 'user_type', 'notif'));
+        return Inertia::render('projects/task-create', compact('tls','employees', 'projects', 'taskcategory', 'user', 'user_type', 'notif','stages'));
     }
 
     public function taskStore(Request $request)

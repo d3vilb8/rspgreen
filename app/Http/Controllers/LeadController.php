@@ -75,7 +75,7 @@ class LeadController extends Controller
             "status" => "required", 
             'lead_stage' => "required",
             'comment' => "required",
-            // 'assign' => "required",
+            'assign' => "required",
         ]);
 
         Lead::create([

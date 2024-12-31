@@ -42,6 +42,7 @@ function Screenshot({
             {
                 onSuccess: () => {
                     console.log("Download successful");
+                    window.location.reload();
                 },
                 onError: (error) => {
                     console.error("Error during file generation:", error);
@@ -51,7 +52,7 @@ function Screenshot({
     };
 
     const handleDelete = (images) => {
-        // Check if images is an array and confirm the deletion
+       
         if (images && images.length > 0) {
             const imagesToDelete = images.map(image => image.id);
 
@@ -65,7 +66,9 @@ function Screenshot({
                         onSuccess: () => {
                             console.log("Deleted successfully");
                             // Reload the page to reflect changes
+                           
                             Inertia.get('/screenshot/employee', { employee_id: employee, start_date: startDate, end_date: endDate });
+                            window.location.reload();
                         },
                         onError: (error) => {
                             console.error("Error during deletion:", error);

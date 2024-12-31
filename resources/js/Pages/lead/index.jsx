@@ -19,7 +19,7 @@ function Index({ user, user_type, notif, leads, assignEmp,projects }) {
     const [itemsPerPage] = useState(10);
     const { delete: destroy } = useForm();
 
-    console.log("assignEmp", projects);
+    console.log("assignEmp", assignEmp);
 
     useEffect(() => {
         const filtered = filteredLeads.filter(lead =>

@@ -28,6 +28,7 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EstimateController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\LeadStageController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\TimesheetController;
 use App\Http\Controllers\AttendanceController;
@@ -40,11 +41,11 @@ use App\Http\Controllers\ChartAccountController;
 use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\EmpolyeeSetupController;
 use App\Http\Controllers\ProductServiceController;
+use App\Http\Controllers\StageOfProjectController;
 use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
-use App\Http\Controllers\LeadStageController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -306,6 +307,12 @@ Route::get('/upload-documents/{id}', [CustomerController::class, 'uploadTable'])
 Route::get('/project-info', [CustomerController::class, 'uploadTable']);
 Route::get('/view-project', [CustomerController::class, 'viewProject']);
 Route::get('/payment-data', [CustomerController::class, 'paymentData']);
+// Route::resource('/project-all-stages', StageOfProjectController::class);
+Route::get('/project-all-stages', [StageOfProjectController::class, 'index']);
+Route::post('/project-all-stages', [StageOfProjectController::class, 'store']);
+Route::put('/project-all-stages/{stage}', [StageOfProjectController::class, 'update']);
+Route::delete('/project-all-stages/{stage}', [StageOfProjectController::class, 'destroy']);
+
 
 Route::post('/upload-documents/{id}', [CustomerController::class, 'storeDocument']);
 

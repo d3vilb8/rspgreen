@@ -174,6 +174,7 @@ const Nav = ({ user_type, usrrr }) => {
                             //     // perm: "view_task",
                             // },
                             { name: "Reports", link: "/reports-get" },
+                            { name: "project-stages", link: "/project-all-stages" }
                         ]}
                     />
                     {props.auth.user.roles[0]?.name === "admin" && (

@@ -18,6 +18,7 @@ const TaskCreate = ({
     user,
     user_type,
     notif,
+    stages,
     tls,
 }) => {
     const { data, setData, post, errors } = useForm({
@@ -33,6 +34,7 @@ const TaskCreate = ({
         rate:'',
         project_id: projects.length > 0 ? projects[0].id : "",
     });
+    console.log("kjhbgv",stages)
 
     const [rows, setRows] = useState([{ name: "", description: "" }]); // Initial row
 
@@ -473,84 +475,69 @@ const TaskCreate = ({
                                 </button>
                             </div>
                             <table className="my-2 w-full text-left">
-                                <thead>
-                                    <tr>
-                                        <th className="px-3 py-2 bg-gray-600 text-white rounded-l">
-                                            #
-                                        </th>
-                                        <th className="px-3 py-2 bg-gray-600 text-white">
-                                            Name
-                                        </th>
-                                        <th className="px-3 py-2 bg-gray-600 text-white">
-                                            Payment
-                                        </th>
-                                        <th className="px-3 py-2 bg-gray-600 text-white rounded-r">
-                                            Action
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {rows.map((row, index) => (
-                                        <tr key={index}>
-                                            <td className="px-3 py-2">
-                                                {index + 1}
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded form-input"
-                                                    value={row.name}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            index,
-                                                            "name",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                <input
-                                                    type="text"
-                                                    className="w-full rounded form-input"
-                                                    value={row.description}
-                                                    onChange={(e) =>
-                                                        handleInputChange(
-                                                            index,
-                                                            "description",
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                />
-                                            </td>
-                                            <td className="px-3 py-2">
-                                                <div className="space-x-2">
-                                                    <button
-                                                        className="px-2 py-2 text-indigo-500"
-                                                        type="button"
-                                                        onClick={() =>
-                                                            handlePayment(index)
-                                                        }
-                                                    >
-                                                        <FaWallet />
-                                                    </button>
-                                                    <button
-                                                        className="px-2 py-2 text-red-500"
-                                                        type="button"
-                                                        onClick={() =>
-                                                            handleDeleteRow(
-                                                                index
-                                                            )
-                                                        }
-                                                    >
-                                                        <FaTrash />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+    <thead>
+        <tr>
+            <th className="px-3 py-2 bg-gray-600 text-white rounded-l">#</th>
+            <th className="px-3 py-2 bg-gray-600 text-white">Name</th>
+            <th className="px-3 py-2 bg-gray-600 text-white">Payment</th>
+            <th className="px-3 py-2 bg-gray-600 text-white rounded-r">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {rows.map((row, index) => (
+            <tr key={index}>
+                <td className="px-3 py-2">{index + 1}</td>
+                <td className="px-3 py-2">
+                    <select
+                        className="w-full rounded form-select"
+                        value={row.name}
+                        onChange={(e) =>
+                            handleInputChange(index, "name", e.target.value)
+                        }
+                    >
+                        <option value="" disabled>
+                            Select a name
+                        </option>
+                        {stages.map((stage) => (
+                            <option key={stage.id} value={stage.name}>
+                                {stage.name}
+                            </option>
+                        ))}
+                    </select>
+                </td>
+                <td className="px-3 py-2">
+                    <input
+                        type="text"
+                        className="w-full rounded form-input"
+                        value={row.description}
+                        onChange={(e) =>
+                            handleInputChange(index, "description", e.target.value)
+                        }
+                    />
+                </td>
+                <td className="px-3 py-2">
+                    <div className="space-x-2">
+                        <button
+                            className="px-2 py-2 text-indigo-500"
+                            type="button"
+                            onClick={() => handlePayment(index)}
+                        >
+                            <FaWallet />
+                        </button>
+                        <button
+                            className="px-2 py-2 text-red-500"
+                            type="button"
+                            onClick={() => handleDeleteRow(index)}
+                        >
+                            <FaTrash />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        ))}
+    </tbody>
+</table>
+
                         </div>
                     )}
                     <div className="w-full p-2">
