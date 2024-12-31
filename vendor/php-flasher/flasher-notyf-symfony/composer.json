@@ -1,0 +1,44 @@
+{
+    "name": "php-flasher/flasher-notyf-symfony",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "homepage": "https://php-flasher.io",
+    "description": "Adopt Notyf's simple flash notifications in Symfony projects with PHPFlasher. Streamline user notifications in Symfony with Notyf's elegant simplicity.",
+    "keywords": [
+        "symfony",
+        "notyf",
+        "flash-notifications",
+        "minimalist-notifications",
+        "phpflasher",
+        "user-feedback",
+        "open-source"
+    ],
+    "support": {
+        "issues": "https://github.com/php-flasher/php-flasher/issues",
+        "source": "https://github.com/php-flasher/php-flasher"
+    },
+    "authors": [
+        {
+            "name": "Younes ENNAJI",
+            "email": "younes.ennaji.pro@gmail.com",
+            "homepage": "https://www.linkedin.com/in/younes--ennaji/",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": ">=8.2",
+        "php-flasher/flasher-notyf": "^2.1.1",
+        "php-flasher/flasher-symfony": "^2.1.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Flasher\\Notyf\\Symfony\\": ""
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true
+    }
+}

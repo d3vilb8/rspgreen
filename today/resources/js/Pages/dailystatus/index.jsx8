@@ -1,0 +1,389 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import moment from 'moment';
+import { useForm } from '@inertiajs/inertia-react';
+import { CgPlayTrackNextO } from "react-icons/cg";
+import { BiSkipPreviousCircle } from "react-icons/bi";
+import { FaPlus } from "react-icons/fa6";
+import Header from '@/Layouts/Header';
+import Nav from '@/Layouts/Nav';
+const Timesheet = ({ leave,user,user_type }) => {
+    const [startDate, setStartDate] = useState(new Date());
+    const [noData, setNoData] = useState(false);
+    const [weekData, setWeekData] = useState([]);
+    const [projects, setProjects] = useState([]);
+    const [totals, setTotals] = useState({ total: {}, overtime: {} });
+    const [taskMapping, setTaskMapping] = useState({});
+    const { data, setData, post, errors } = useForm({
+        timesheets: [],
+    });
+    const [selectedWeek, setSelectedWeek] = useState(moment().startOf('isoWeek').format('YYYY-MM-DD'));
+    const [holidays, setHolidays] = useState([]);
+
+    useEffect(() => {
+        axios.get('/getProjectTasks')
+            .then(response => {
+                const data = response.data || {};
+                setTaskMapping(data);
+                setProjects(Object.keys(data).map(projectId => ({
+                    id: projectId,
+                    project_name: data[projectId].project_name
+                })));
+            })
+            .catch(error => console.error('Error fetching project tasks:', error));
+
+        axios.get('/holidays-fetch')
+            .then(response => setHolidays(response.data))
+            .catch(error => console.error('Error fetching holidays:', error));
+    }, []);
+    const [status, setStatus] = useState(null);
+    useEffect(() => {
+        fetchWeekData(selectedWeek);
+        console.log('Week Data:', selectedWeek);
+    }, [selectedWeek]);
+    useEffect(() => {
+        console.log('Updated Week Data:', weekData);
+    }, [weekData]);
+    const fetchWeekData = (week) => {
+        axios.get(`/timesheets/${week}`)
+            .then(response => {
+                console.log(response);
+                const fetchedData = response.data.map(entry => {
+                    const entries = entry.entries || {};
+                    const formattedEntry = {
+                        project_id: entry.project_id,
+                        task_id: entry.task_id,
+                        status: entry.status,
+                        ...entries,
+                    };
+
+                    return formattedEntry;
+                });
+
+                if (fetchedData.length === 0) {
+                    setNoData(true);
+                } else {
+                    setNoData(false);
+                    setWeekData(fetchedData);
+                    setData('timesheets', fetchedData);
+                    if (fetchedData[0] && fetchedData[0].status !== undefined) {
+                        setStatus(fetchedData[0].status);
+                    }
+                }
+                calculateTotals(fetchedData); // Calculate totals initially
+            })
+            .catch(error => console.error('Error fetching the timesheet data!', error));
+    };
+
+
+    const getCurrentDate = (i) => {
+        return moment(selectedWeek).startOf('isoWeek').add(i, 'days').format('YYYY-MM-DD');
+    };
+    const CurrentDate=(i)=>{
+        const date = moment(selectedWeek).startOf('isoWeek').add(i, 'days');
+    const dayName = date.format('ddd'); // Day name (e.g., Mon)
+    const dayDate = date.format('MMM D'); // Date (e.g., Aug 5)
+    return { dayName, dayDate };
+    }
+    const handlePreviousWeek = () => {
+        setSelectedWeek(moment(selectedWeek).subtract(1, 'weeks').format('YYYY-MM-DD'));
+    };
+
+    const handleNextWeek = () => {
+        setSelectedWeek(moment(selectedWeek).add(1, 'weeks').format('YYYY-MM-DD'));
+    };
+
+    const leaveStartDate = new Date(leave.sdate);
+    const leaveEndDate = new Date(leave.edate);
+
+    const isDisabled = (date) => {
+        const currentDate = new Date(date);
+        return currentDate >= leaveStartDate && currentDate <= leaveEndDate;
+    };
+
+    const isHoliday = (date) => {
+        return holidays.some(holiday => {
+            const startDate = moment(holiday.start_date, 'YYYY-MM-DD');
+            const endDate = moment(holiday.end_date, 'YYYY-MM-DD');
+            const currentDate = moment(date, 'YYYY-MM-DD');
+            return currentDate.isBetween(startDate, endDate, 'day', '[]');
+        });
+    };
+
+    const handleProjectChange = (index, projectId) => {
+        const newWeekData = [...weekData];
+        newWeekData[index] = {
+            ...newWeekData[index],
+            project_id: projectId,
+            task_id: '',
+        };
+        setWeekData(newWeekData);
+        setData('timesheets', newWeekData);
+    };
+
+    const handleTaskChange = (index, taskId) => {
+        const newWeekData = [...weekData];
+        newWeekData[index] = {
+            ...newWeekData[index],
+            task_id: taskId,
+        };
+        setWeekData(newWeekData);
+        setData('timesheets', newWeekData);
+    };
+
+    const handleTimeChange = (index, date, value) => {
+        const newWeekData = [...weekData];
+        newWeekData[index] = {
+            ...newWeekData[index],
+            [date]: value || '',
+        };
+        setWeekData(newWeekData);
+        const updatedTimesheets = newWeekData.map((entry, i) => ({
+            ...entry,
+            date: getCurrentDate(i % 7),
+        }));
+        setData('timesheets', updatedTimesheets);
+        calculateTotals(newWeekData); // Recalculate totals after updating time
+    };
+
+    const handleStatusChange = (index, status) => {
+        const newWeekData = [...weekData];
+        newWeekData[index] = {
+            ...newWeekData[index],
+            status,
+        };
+        setWeekData(newWeekData);
+        setData('timesheets', newWeekData);
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const updatedTimesheets = weekData.map((entry, index) => ({
+            ...entry,
+            date: getCurrentDate(index % 7),
+        }));
+        setData('timesheets', updatedTimesheets);
+        console.log('Data being sent:', updatedTimesheets);
+        post('timesheets-store', {
+            preserveScroll: true,
+            onSuccess: () => console.log('Timesheets saved successfully'),
+            onError: () => console.error('Error saving the timesheets'),
+        });
+    };
+
+    const handleStatus = (e) => {
+        e.preventDefault();
+        const updatedTimesheets = weekData.map((entry, index) => ({
+            ...entry,
+            date: getCurrentDate(index % 7),
+        }));
+        setData('timesheets', updatedTimesheets);
+        post('timesheets-status', {
+            preserveScroll: true,
+            onSuccess: () => console.log('Timesheets status updated successfully'),
+            onError: () => console.error('Error updating the timesheets status'),
+        });
+    };
+
+    const addRow = () => {
+        setWeekData([...weekData, { project_id: '', task_id: '', time_number: '' }]);
+        setNoData(false);
+    };
+
+    const calculateTotals = (data) => {
+        const totals = { total: {}, overtime: {} };
+
+        for (let i = 0; i < 7; i++) {
+            const date = getCurrentDate(i);
+            let dailyTotal = 0;
+            data.forEach(row => {
+                dailyTotal += parseFloat(row[date] || 0);
+            });
+            totals.total[date] = dailyTotal;
+            // Calculate overtime (or under-time)
+            if (dailyTotal > 8) {
+                totals.overtime[date] = dailyTotal - 8;
+            } else if (dailyTotal < 8) {
+                totals.overtime[date] = dailyTotal - 8; // This will be negative
+            } else {
+                totals.overtime[date] = 0;
+            }
+        }
+
+        setTotals(totals);
+    };
+
+
+    const getWeekRange = (selectedDate) => {
+        const startOfWeek = moment(selectedDate).startOf('isoWeek');
+        const endOfWeek = moment(selectedDate).endOf('isoWeek');
+        return { start: startOfWeek, end: endOfWeek };
+    };
+
+    const formatWeekRange = (start, end) => {
+        const formattedStart = start.format('dddd, MMMM DD, YYYY');
+        const formattedEnd = end.format('dddd, MMMM DD, YYYY');
+        return `${formattedStart} - ${formattedEnd}`;
+    };
+
+    const weekRange = getWeekRange(selectedWeek);
+    const formattedWeekRange = formatWeekRange(weekRange.start, weekRange.end);
+    const isWeekend = (i) => {
+        const day = moment(selectedWeek).startOf('isoWeek').add(i, 'days').day();
+        return day === 6 || day === 0; // 6 is Saturday, 0 is Sunday
+    };
+    const [taskData, setTaskData] = useState([]);
+
+    useEffect(() => {
+    fetch('/timesheets-time')
+        .then(response => response.json())
+        .then(data => {
+            console.log(data)
+            setTaskData(data);
+        });
+}, []);
+    return (
+        <div className='px-[8rem]'>
+           <Header user={user}/>
+           <Nav user_type={user_type}/>
+           <div className="space-x-2" style={{ display: 'flex', justifyContent: 'space-between', margin: '1rem' }}>
+                <p>
+                    <span className='font-bold '>Week</span>: <span className='text-red-500 underline'> {formattedWeekRange}</span>
+               </p>
+                <div>
+
+                    <button onClick={handlePreviousWeek} className='underline'>
+                        <BiSkipPreviousCircle className='text-[2rem] text-blue-500'/>
+                    </button>
+                    <button onClick={handleNextWeek} className='underline'>
+                        <CgPlayTrackNextO className='text-[2rem] text-blue-500'/>
+                    </button>
+                </div>
+            </div>
+          {
+            status===1?<>  <p>Already submitted timesheet status as approved</p>
+            <p>contact admin to edit timesheet</p></>:''
+          }
+            <div className='flex justify-end'>
+                <button onClick={addRow} className='p-2 text-white bg-blue-800 rounded-md '>
+                    <FaPlus />
+                </button>
+           </div>
+        <form onSubmit={handleSubmit}>
+
+            <table className='w-full'>
+                <thead className='bg-[#465584] text-white'>
+                    <tr >
+                        <th className='p-1 border'>Project</th>
+                        <th className='p-1 border'>Task</th>
+                        {Array.from({ length: 7 }).map((_, i) => {
+            const { dayName, dayDate } = CurrentDate(i);
+            return (
+                <th className='p-1 text-center border' key={i}>
+                    <div>{dayName}</div>
+                    <div>{dayDate}</div>
+                </th>
+            );
+        })}
+                    </tr>
+                </thead>
+                <tbody>
+                    {weekData.map((rowData, index) => (
+                        <tr key={index}>
+                            <td>
+                                <select
+                                    className='bg-[#6699CC] text-white'
+                                    name={`timesheets[${index}].project_id`}
+                                    value={rowData.project_id}
+                                    onChange={(e) => handleProjectChange(index, e.target.value)}
+                                >
+                                    <option value="">Select Project</option>
+                                    {projects.map(project => (
+                                        <option key={project.id} value={project.id}>
+                                            {project.project_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </td>
+                            <td>
+                                <select
+                                    className='bg-[#6699CC] text-white'
+                                    name={`timesheets[${index}].task_id`}
+                                    value={rowData.task_id}
+                                    onChange={(e) => handleTaskChange(index, e.target.value)}
+                                >
+                                    <option value="">Select Task</option>
+                                    {(taskMapping[rowData.project_id]?.tasks || []).map(task => (
+                                        <option key={task.task_id} value={task.task_id}>
+                                            {task.task_name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </td>
+                            {taskData.map((task, index) => (
+    <tr key={task.task_id}>
+        {Array.from({ length: 7 }).map((_, i) => {
+            const date = getCurrentDate(i);
+            const taskHours = task.time_number || 0; // Hours worked on the task
+            const estimateExceeded = rowData[date] && parseFloat(rowData[date]) + taskHours > task.estimate_hours;
+
+            return (
+                <td key={i}>
+                    <input
+                        className={`form-control ${estimateExceeded ? 'bg-[#f7e0e0] text-white w-[88px]' : 'w-[88px]'}`}
+                        type="number"
+                        name={`timesheets[${index}][${date}]`}
+                        value={rowData[date] || ''}
+                        onChange={(e) => handleTimeChange(index, date, e.target.value)}
+                        disabled={disabled}
+                    />
+                    {estimateExceeded && <p className="text-red-500">Estimate Exceeded for {task.task_name}!</p>}
+                </td>
+            );
+        })}
+    </tr>
+))}
+
+                        </tr>
+                    ))}
+                    <tr className='bg-[#e0f7e0]'>
+                        <td className='border'></td>
+                        <td className='border'>Total</td>
+                        {Array.from({ length: 7 }).map((_, i) => {
+                            const date = getCurrentDate(i);
+                            return (
+                                <td key={i} className='p-2 border'>{totals.total[date] || 0}</td>
+                            );
+                        })}
+                    </tr>
+                    <tr className='bg-[#f7e0e0]'>
+                        <td className='border'></td>
+                        <td className='border'>Overtime</td>
+                        {Array.from({ length: 7 }).map((_, i) => {
+                            const date = getCurrentDate(i);
+                            const over=totals.overtime[date] || 0
+                            return (
+                                <td  style={{ color: over > 0 ? 'red' : 'red' }} key={i} className='p-2 border'>{over }</td>
+                            );
+                        })}
+                    </tr>
+                </tbody>
+            </table>
+            {/* <div>
+
+                <button type="submit">Submit</button>
+                <button type="button" onClick={handleStatus}>Update Status</button>
+            </div> */}
+            <div className='flex justify-end mt-3 space-x-3'>
+                <button onClick={handleSubmit} className='border-2 p-2 bg-[#465584] text-white rounded-md' disabled={status=== 1}>Save time Status</button>
+                {
+                    console.log(status)
+                }
+                <button onClick={handleStatus} className='border-2 p-2 bg-[#F06495] text-white rounded-md' disabled={status=== 1}>Submit time Status</button>
+            </div>
+        </form>
+        </div>
+    );
+};
+
+export default Timesheet;
