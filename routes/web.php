@@ -72,8 +72,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/employees-create', [EmployeeController::class, 'create'])->name('employees-create');
         Route::post('/employees-store', [EmployeeController::class, 'store']);
         Route::get('/employees-edit/{id}', [EmployeeController::class, 'edit'])->name('employees-edit');
-        Route::get('/screenshot/employee',[EmployeeController::class,'screenshot']);
-        Route::get('/workhours/employee',[EmployeeController::class,'workhours']);
+        Route::get('/screenshot/employee', [EmployeeController::class, 'screenshot']);
+        Route::get('/workhours/employee', [EmployeeController::class, 'workhours']);
         Route::post('/employees-update/{id}', [EmployeeController::class, 'update']);
         Route::get('/employees-destroy/{id}', [EmployeeController::class, 'destroy']);
         // Route::get('/holiday-location',[HolidayWorkController::class,'holidayLocation']);
@@ -87,25 +87,25 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projects-show/{id}', [ProjectController::class, 'show']);
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attandance');
         Route::post('/attendance', [AttendanceController::class, 'index'])->name('attandance');
-//holiday-locationwise
-Route::get('/holidays-location', [HolidayController::class, 'index']);
-Route::post('/holidays-location', [HolidayController::class, 'store']);
-Route::put('/holidays-location/{id}', [HolidayController::class, 'update']);
-Route::delete('/holidays-location/{id}', [HolidayController::class, 'destroy']);
-Route::get('/holiday-all-location',[HolidayController::class, 'listLocation']);
-Route::post('/holiday-all-location',[HolidayController::class, 'storeLocation']);
-Route::put('/holiday-all-location/{id}', [HolidayController::class, 'updateLocation']);
-Route::delete('/holiday-all-location/{id}', [HolidayController::class, 'deleteLocation']);
+        //holiday-locationwise
+        Route::get('/holidays-location', [HolidayController::class, 'index']);
+        Route::post('/holidays-location', [HolidayController::class, 'store']);
+        Route::put('/holidays-location/{id}', [HolidayController::class, 'update']);
+        Route::delete('/holidays-location/{id}', [HolidayController::class, 'destroy']);
+        Route::get('/holiday-all-location', [HolidayController::class, 'listLocation']);
+        Route::post('/holiday-all-location', [HolidayController::class, 'storeLocation']);
+        Route::put('/holiday-all-location/{id}', [HolidayController::class, 'updateLocation']);
+        Route::delete('/holiday-all-location/{id}', [HolidayController::class, 'deleteLocation']);
 
-       
-//calender holidays
-Route::get('/holidays-calender', [HolidayController::class, 'HolidayCalender']);
+
+        //calender holidays
+        Route::get('/holidays-calender', [HolidayController::class, 'HolidayCalender']);
 
         Route::get('/projects-task', [ProjectController::class, 'Task']);
         Route::get('/task-create', [ProjectController::class, 'taskCreate']);
 
         Route::get('/task-category', [ProjectController::class, 'Tskcategory']);
-      
+
 
 
         Route::get('/leave-type', [LeaveManagementController::class, 'leavType']);
@@ -135,8 +135,8 @@ Route::get('/holidays-calender', [HolidayController::class, 'HolidayCalender']);
     Route::get('/getProjectTasks', [DailyStatusController::class, 'getProjectTasks'])->name('getProjectTasks');
     Route::post('/leave-approve/{id}', [LeaveManagementController::class, 'leaveStatusApprove']);
     Route::post('/leave-reject/{id}', [LeaveManagementController::class, 'leaveStatusReject']);
-    Route::post('/bulk/delete', [EmployeeController::class,'deleteImage']);
-   
+    Route::post('/bulk/delete', [EmployeeController::class, 'deleteImage']);
+
 
     Route::post('/leave-store-data', [LeaveManagementController::class, 'leavestoredata']);
     Route::post('/leave-store-update/{id}', [LeaveManagementController::class, 'leaveUpdatePost']);
@@ -227,11 +227,16 @@ Route::post('/approvetime/{id}', [EmployeeController::class, 'ApproveStatuschang
 Route::post('/rejectapprovetime/{id}', [EmployeeController::class, 'RejectStatuschange']);
 // Route::get('/employee-department', [EmployeeController::class, 'employeesetip']);
 Route::resource('branches', EmpolyeeSetupController::class);
-Route::post('branches-update/{id}', [EmpolyeeSetupController::class,'update']);
+Route::post('branches-update/{id}', [EmpolyeeSetupController::class, 'update']);
 Route::resource('departments', DepartmentController::class);
-Route::post('departments/{id}', [DepartmentController::class,'update']);
+Route::resource('branches', EmpolyeeSetupController::class);
+Route::post('branches-transfer/{id}', [EmpolyeeSetupController::class, 'transfer']);
+
+
+
+Route::post('departments/{id}', [DepartmentController::class, 'update']);
 Route::resource('designations', DesignatonController::class);
-Route::post('designations-up/{id}', [DesignatonController::class,'update']);
+Route::post('designations-up/{id}', [DesignatonController::class, 'update']);
 Route::resource('payslips', PaySlipController::class);
 Route::resource('documents', DocumentController::class);
 // Route::get('attendances', [AttendanceController::class, 'index']);
@@ -270,7 +275,7 @@ Route::post('suppliers/delete/{supplier}', [UserController::class, 'supplierdest
 Route::post('suppliers/update/{supplier}', [UserController::class, 'supplierupdate']);
 
 Route::resource('product-services', ProductServiceController::class);
-Route::post('product-services/{id}', [ProductServiceController::class,'update']);
+Route::post('product-services/{id}', [ProductServiceController::class, 'update']);
 Route::resource('chart-accounts', ChartAccountController::class);
 Route::resource('journals', JournalEntryController::class);
 Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
@@ -318,20 +323,20 @@ Route::post('/upload-documents/{id}', [CustomerController::class, 'storeDocument
 
 Route::delete('/delete-document/{id}', [CustomerController::class, 'deleteDocument']);
 
-Route::post('/upload',[AdminController::class]);
-Route::resource('/lead',LeadController::class);
+Route::post('/upload', [AdminController::class]);
+Route::resource('/lead', LeadController::class);
 // Route::post('/lead/{id}/view',[LeadController::class,'viewDetails']);
 Route::match(['get', 'post'], '/lead/{id}/view', [LeadController::class, 'viewDetails']);
 
 
 Route::post('/lead/assign', [LeadController::class, 'assign'])->name('lead.assign');
 
-Route::resource('deal',DealController::class);
-Route::resource('contract',ContractController::class);
-Route::post('/bulk/download',[EmployeeController::class,'downloadImages']);
-Route::get('/download/{fileName}',[EmployeeController::class,'downloadFile'])->name('download.file');
-Route::get('employees/show/{id}',[EmployeeController::class,'show']);
-Route::get('leave/show/{id}',[LeaveManagementController::class,'show']);
+Route::resource('deal', DealController::class);
+Route::resource('contract', ContractController::class);
+Route::post('/bulk/download', [EmployeeController::class, 'downloadImages']);
+Route::get('/download/{fileName}', [EmployeeController::class, 'downloadFile'])->name('download.file');
+Route::get('employees/show/{id}', [EmployeeController::class, 'show']);
+Route::get('leave/show/{id}', [LeaveManagementController::class, 'show']);
 // Route::get('upload-documents/{id}',[AdminController::class,'']);
 // Route::get('lead/addStage', [LeadStageController::class, 'index'])->name('lead/addStage');
 Route::resource('lead-sources', LeadSourceController::class);

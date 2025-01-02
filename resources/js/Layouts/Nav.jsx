@@ -62,7 +62,7 @@ const Nav = ({ user_type, usrrr }) => {
                             className="w-[85%]"
                         />
                     </div>
-                    
+
                     <li
                         className={
                             url === "/dashboard"
@@ -82,21 +82,6 @@ const Nav = ({ user_type, usrrr }) => {
                             <span>Dashboard</span>{" "}
                         </Link>
                     </li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<FaHome />}
@@ -138,9 +123,6 @@ const Nav = ({ user_type, usrrr }) => {
                                     link: "/tax",
                                     perm: "view_tax",
                                 },
-                               
-                               
-                                
                             ]}
                         />
                     )}
@@ -174,7 +156,10 @@ const Nav = ({ user_type, usrrr }) => {
                             //     // perm: "view_task",
                             // },
                             { name: "Reports", link: "/reports-get" },
-                            { name: "project-stages", link: "/project-all-stages" }
+                            {
+                                name: "project-stages",
+                                link: "/project-all-stages",
+                            },
                         ]}
                     />
                     {props.auth.user.roles[0]?.name === "admin" && (
@@ -205,12 +190,10 @@ const Nav = ({ user_type, usrrr }) => {
                                 {
                                     name: "Holiday Calender",
                                     link: "/holidays-calender",
-                                }
-                               
+                                },
                             ]}
                         />
                     )}
-
 
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
@@ -218,23 +201,6 @@ const Nav = ({ user_type, usrrr }) => {
                             name={"User Management"}
                             items={[
                                 { name: "Customer", link: "/clients" },
-                                //  { name: 'Timesheet', link: '/daily-status' },
-                                // { name: 'Tasks', link: '/projects-task' },
-                                // { name: 'Task Calendar', link: '/taskcalendar' },
-                                // { name: 'Reports', link: '/reports-get' }
-                            ]}
-                        />
-                    )}
-                    {props.auth.user.roles[0]?.name === "admin" && (
-                        <DropdownMenu
-                            icon={<FaFolderClosed />}
-                            name={"CRM"}
-                            items={[
-                                // {
-                                //     name: "Project",
-                                //     link: "/lead-sources",
-                                //     perm: "view_contracts",
-                                // },
                                 {
                                     name: " Lead Stages",
                                     link: "/lead-stages",
@@ -250,6 +216,24 @@ const Nav = ({ user_type, usrrr }) => {
                                     link: "/deal",
                                     perm: "view_deals",
                                 },
+                                //  { name: 'Timesheet', link: '/daily-status' },
+                                // { name: 'Tasks', link: '/projects-task' },
+                                // { name: 'Task Calendar', link: '/taskcalendar' },
+                                // { name: 'Reports', link: '/reports-get' }
+                            ]}
+                        />
+                    )}
+                    {/* {props.auth.user.roles[0]?.name === "admin" && (
+                        <DropdownMenu
+                            icon={<FaFolderClosed />}
+                            name={"CRM"}
+                            items={[
+                                // {
+                                //     name: "Project",
+                                //     link: "/lead-sources",
+                                //     perm: "view_contracts",
+                                // },
+                              
                                 {
                                     name: "Contract",
                                     link: "/contract",
@@ -259,7 +243,7 @@ const Nav = ({ user_type, usrrr }) => {
                                 // { name: 'Reports', link: '/reports-get' }
                             ]}
                         />
-                    )}
+                    )} */}
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<FaFolderClosed />}
