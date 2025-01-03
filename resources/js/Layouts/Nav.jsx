@@ -37,6 +37,7 @@ const Nav = ({ user_type, usrrr }) => {
         { name: "employee setup", link: "/branches", perm: "view_employee" },
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
+        { name: "Attendance", link: "/attendance", perm: "view_salary" },
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];
 
@@ -183,6 +184,10 @@ const Nav = ({ user_type, usrrr }) => {
                             icon={<FaEye />}
                             name={"Holiday"}
                             items={[
+                                {
+                                    name: "Holiday-location",
+                                    link: "/holiday-locationswise",
+                                },
                                 {
                                     name: "Holiday List",
                                     link: "/holidays-location",

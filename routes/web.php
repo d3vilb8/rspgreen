@@ -42,6 +42,7 @@ use App\Http\Controllers\JournalEntryController;
 use App\Http\Controllers\EmpolyeeSetupController;
 use App\Http\Controllers\ProductServiceController;
 use App\Http\Controllers\StageOfProjectController;
+use App\Http\Controllers\HolidayLocationController;
 use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\ServiceCategoryController;
@@ -88,6 +89,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/projects-show/{id}', [ProjectController::class, 'show']);
         Route::get('/attendance', [AttendanceController::class, 'index'])->name('attandance');
         Route::post('/attendance', [AttendanceController::class, 'index'])->name('attandance');
+        // Route::post('/attendance/{id}', [AttendanceController::class, 'destroy'])->name('attandance');
+        Route::delete('/attendances/{attendance}', [AttendanceController::class, 'destroy'])->name('attendances.destroy');
+
         //holiday-locationwise
         Route::get('/holidays-location', [HolidayController::class, 'index']);
         Route::post('/holidays-location', [HolidayController::class, 'store']);
@@ -235,7 +239,7 @@ Route::resource('branches', EmpolyeeSetupController::class);
 Route::post('/branches-transfer/{branchId}', [EmpolyeeSetupController::class, 'transferEmployees']);
 // Add a new route for deletion with transfer
 // Route::post('/branches/{id}/delete', [EmpolyeeSetupController::class, 'destroyWithTransfer']);
-
+Route::resource('holiday-locationswise', HolidayLocationController::class);
 
 Route::post('departments/{id}', [DepartmentController::class, 'update']);
 Route::resource('designations', DesignatonController::class);

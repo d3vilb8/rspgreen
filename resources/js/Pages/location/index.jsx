@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/Layouts/Header';
 import Nav from '@/Layouts/Nav';
 
-const Product = ({ user, notif, user_type, holidays }) => {
+const Product = ({ user, notif, user_type, holidays, }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -255,14 +255,22 @@ const Product = ({ user, notif, user_type, holidays }) => {
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block mb-2 font-medium">Location</label>
-                  <input
-                    type="text"
-                    name="location"
-                    className="border border-gray-300 rounded-md px-4 py-2 w-full"
-                    defaultValue={currentItem ? currentItem.location : ''}
-                  />
-                </div>
+    <label className="block mb-2">Location</label>
+    <select
+        value={location}
+        onChange={(e) => setData('location', e.target.value)}
+        className="w-full px-4 py-2 border border-gray-300 rounded-md"
+    >
+        <option value="" disabled>Select a location</option>
+        {holidays.map((holiday, index) => (
+            <option key={index} value={holiday.name || holiday}>
+                {holiday.name || holiday}
+            </option>
+        ))}
+    </select>
+    {/* {errors.location && <p className="text-red-500">{errors.location}</p>} */}
+</div>
+
                 <div className="flex justify-end">
                   <button
                     type="button"

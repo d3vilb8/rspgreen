@@ -84,19 +84,6 @@ const Nav = ({ user_type, usrrr }) => {
                     </li>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
                     {props.auth.user.roles[0]?.name === "admin" && (
                         <DropdownMenu
                             icon={<FaHome />}
@@ -197,6 +184,7 @@ const Nav = ({ user_type, usrrr }) => {
                             icon={<FaEye />}
                             name={"Holiday"}
                             items={[
+                                
                                 {
                                     name: "Holiday List",
                                     link: "/holidays-location",

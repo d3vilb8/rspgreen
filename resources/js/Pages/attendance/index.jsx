@@ -19,7 +19,7 @@ const Attendance = ({ user, notif, user_type, documents, employees, attendances 
         in_time: '',
         out_time: ''
     });
-    
+    console.log("jhgfgh",)
     async function editAttd(id) {
         setEditId(id)
         await axios.get(`/attendances/${id}`).then((res) => {
@@ -65,6 +65,17 @@ const Attendance = ({ user, notif, user_type, documents, employees, attendances 
             }
         })
     }
+    async function handleDelete(id) {
+        try {
+            await axios.delete(`/attendances/${id}`);
+            notyf.success("Attendance deleted successfully.");
+            // Refresh the attendance list after deletion
+        } catch (error) {
+            // notyf.error("Failed to delete attendance.");
+            console.error(error);
+        }
+    }
+    
 
     return (
         <div className='w-[85.2%] ml-[11.5rem]'>
@@ -112,7 +123,7 @@ const Attendance = ({ user, notif, user_type, documents, employees, attendances 
             </Modal>
             <div className="w-full px-9">
                 <div className='flex justify-between items-center'>
-                    <h1 className='text-xl'>Manage Attendance</h1>
+                    <h1 className='text-xl px-9 '>Manage Attendance</h1>
                     <button onClick={(e) => setModal(true)} className='text-sm px-4 py-2 rounded text-white bg-blue-500'>Create Attendance</button>
                 </div>
                 <div className='py-4'>
@@ -140,7 +151,13 @@ const Attendance = ({ user, notif, user_type, documents, employees, attendances 
                                             <td className='py-2 pl-2 text-sm'>
                                                 <div className='space-x-2'>
                                                     <button onClick={(e)=>{setEdit(true);editAttd(a.id);}} className='px-2 py-2 bg-blue-500 rounded text-white'><FaPencil /></button>
-                                                    <button className='px-2 py-2 bg-red-500 rounded text-white'><FaTrash /></button>
+                                                    <button
+    onClick={() => handleDelete(a.id)}
+    className="px-2 py-2 bg-red-500 rounded text-white"
+>
+    <FaTrash />
+</button>
+
                                                 </div>
                                             </td>
                                         </tr>

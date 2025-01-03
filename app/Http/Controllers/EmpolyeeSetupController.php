@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Models\Branch;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\User;
 
 class EmpolyeeSetupController extends Controller
 {
@@ -60,19 +61,23 @@ class EmpolyeeSetupController extends Controller
         return response()->json(['message' => 'Branch deleted successfully!']);
     }
 
-    // Transfer employees between branches
+
     public function transferEmployees(Request $request, $branchId)
     {
         $request->validate([
             'transfer_to' => 'required|exists:branches,id',
-            'quantity' => 'required', 
+            'quantity' => 'required',
         ]);
     
         $targetBranchId = $request->input('transfer_to');
         $quantity = $request->input('quantity'); 
     
-       
-        $employees = Employee::where('branch_id', $branchId)->limit($quantity)->get();
+        // Retrieve employee names and their user IDs using a join
+        $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
+            ->select('users.name', 'users.id')  // Selecting employee name and user ID
+            ->where('employees.branch_id', $branchId)
+            ->limit($quantity)
+            ->get();
     
         if ($employees->isEmpty()) {
             return redirect()->back()->with('error', 'Not enough employees to transfer.');
@@ -80,10 +85,12 @@ class EmpolyeeSetupController extends Controller
     
         // Update the branch_id for the selected employees
         foreach ($employees as $employee) {
-            $employee->update(['branch_id' => $targetBranchId]);
+            Employee::where('user_id', $employee->id)  // Update based on user ID
+                ->update(['branch_id' => $targetBranchId]);
         }
     
         return redirect()->back()->with('success', 'Employees transferred successfully!');
     }
+    
     
 }

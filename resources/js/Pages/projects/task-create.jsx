@@ -36,10 +36,10 @@ const TaskCreate = ({
     });
     console.log("kjhbgv",stages)
 
-    const [rows, setRows] = useState([{ name: "", description: "" }]); // Initial row
+    const [rows, setRows] = useState([{ name: "", description: "",ammount: 0 }]); // Initial row
 
     const handleAddRow = () => {
-        setRows([...rows, { name: "", description: "" }]); // Add a new row
+        setRows([...rows, { name: "", description: "",ammount: 0 }]); // Add a new row
     };
 
     const handleDeleteRow = (index) => {
@@ -47,13 +47,18 @@ const TaskCreate = ({
     };
 
     const handleInputChange = (index, field, value) => {
-        setRows(
-            rows.map((row, rowIndex) =>
-                rowIndex === index ? { ...row, [field]: value } : row
-            )
-        ); // Update the field for the specific row by index
-    };
-
+        const newRows = [...rows];
+        newRows[index][field] = value;
+      
+        // If name is changed, autofill the ammount based on selected stage
+        if (field === "name") {
+          const selectedStage = stages.find(stage => stage.name === value);
+          // Ensure we reference 'ammount' instead of 'amount'
+          newRows[index].ammount = selectedStage ? selectedStage.ammount : 0;
+        }
+        setRows(newRows);
+      };
+      
     const { props } = usePage();
 
     const projectSelectRef = useRef(null); // Ref for project select
@@ -475,70 +480,65 @@ const TaskCreate = ({
                                 </button>
                             </div>
                             <table className="my-2 w-full text-left">
-    <thead>
+                            <thead>
         <tr>
-            <th className="px-3 py-2 bg-gray-600 text-white rounded-l">#</th>
-            <th className="px-3 py-2 bg-gray-600 text-white">Name</th>
-            <th className="px-3 py-2 bg-gray-600 text-white">Payment</th>
-            <th className="px-3 py-2 bg-gray-600 text-white rounded-r">Action</th>
+          <th className="px-3 py-2 bg-gray-600 text-white rounded-l">#</th>
+          <th className="px-3 py-2 bg-gray-600 text-white">Name</th>
+          <th className="px-3 py-2 bg-gray-600 text-white">Payment</th>
+          <th className="px-3 py-2 bg-gray-600 text-white rounded-r">Action</th>
         </tr>
-    </thead>
-    <tbody>
+      </thead>
+      <tbody>
         {rows.map((row, index) => (
-            <tr key={index}>
-                <td className="px-3 py-2">{index + 1}</td>
-                <td className="px-3 py-2">
-                <select
-  className="w-full rounded form-select"
-  value={row.name}
-  onChange={(e) => {
-    const selectedOption = e.target.value;
-    console.log("Selected Option:", selectedOption);
-    handleInputChange(index, "name", selectedOption);
-  }}
->
-  <option value="" disabled>
-    Select a name
-  </option>
-  {stages.map((stage) => (
-    <option key={stage.id} value={stage.name}>
-      {stage.name}
-    </option>
-  ))}
-</select>
-
-                </td>
-                <td className="px-3 py-2">
-                    <input
-                        type="text"
-                        className="w-full rounded form-input"
-                        value={row.description}
-                        onChange={(e) =>
-                            handleInputChange(index, "description", e.target.value)
-                        }
-                    />
-                </td>
-                <td className="px-3 py-2">
-                    <div className="space-x-2">
-                        <button
-                            className="px-2 py-2 text-indigo-500"
-                            type="button"
-                            onClick={() => handlePayment(index)}
-                        >
-                            <FaWallet />
-                        </button>
-                        <button
-                            className="px-2 py-2 text-red-500"
-                            type="button"
-                            onClick={() => handleDeleteRow(index)}
-                        >
-                            <FaTrash />
-                        </button>
-                    </div>
-                </td>
-            </tr>
+          <tr key={index}>
+            <td className="px-3 py-2">{index + 1}</td>
+            <td className="px-3 py-2">
+              <select
+                className="w-full rounded form-select"
+                value={row.name}
+                onChange={(e) => {
+                  const selectedOption = e.target.value;
+                  console.log("Selected Option:", selectedOption);
+                  handleInputChange(index, "name", selectedOption);
+                }}
+              >
+                <option value="" disabled>Select a name</option>
+                {stages.map((stage) => (
+                  <option key={stage.id} value={stage.name}>
+                    {stage.name}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td className="px-3 py-2">
+              <input
+                type="text"
+                className="w-full rounded form-input"
+                value={row.ammount} // autofilled amount
+                readOnly
+              />
+            </td>
+            <td className="px-3 py-2">
+              <div className="space-x-2">
+                <button
+                  className="px-2 py-2 text-indigo-500"
+                  type="button"
+                  onClick={() => handlePayment(index)}
+                >
+                  <FaWallet />
+                </button>
+                <button
+                  className="px-2 py-2 text-red-500"
+                  type="button"
+                  onClick={() => handleDeleteRow(index)}
+                >
+                  <FaTrash />
+                </button>
+              </div>
+            </td>
+          </tr>
         ))}
-    </tbody>
+      </tbody>
 </table>
 
                         </div>

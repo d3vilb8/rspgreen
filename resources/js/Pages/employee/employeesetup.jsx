@@ -12,6 +12,7 @@ const TableComponent = ({
     notif,
     user_type,
     branchesa,
+    employees,
     searchEmpCount,
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,8 +22,10 @@ const TableComponent = ({
     const options = [
         { value: 1, label: "pinaki roy" },
         { value: 2, label: "Ella Schultz" },
+        { value: 3, label: "ami" },
        
     ];
+    console.log("kjhgf",employees)
     
     const notyf = new Notyf();
 
@@ -289,48 +292,24 @@ const TableComponent = ({
             {/* Quantity Input Field */}
             <label className="block mb-2 mt-4">
     Employee Name
-    <div className="flex items-center mt-1 relative">
-        <div className="block w-full p-2 border border-gray-300 rounded-md cursor-pointer">
-            Select Options
-        </div>
-        <div className="absolute mt-1 w-full border border-gray-300 rounded-md bg-white z-10">
+    <div className="flex items-center mt-1">
+        <select
+            value={data.quantity}
+            onChange={(e) => setData("quantity", e.target.value)}
+            className="block w-full p-2 border border-gray-300 rounded-md"
+        >
             {options.map((option, index) => (
-                <label
-                    key={index}
-                    className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
-                >
-                    <input
-                        type="checkbox"
-                        value={option.value}
-                        onChange={(e) => {
-                            // Handle checkbox state change here
-                            const isChecked = e.target.checked;
-                            if (isChecked) {
-                                // Add value to selected list
-                                setData("quantity", [
-                                    ...(data.quantity || []),
-                                    option.value,
-                                ]);
-                            } else {
-                                // Remove value from selected list
-                                setData(
-                                    "quantity",
-                                    (data.quantity || []).filter(
-                                        (value) => value !== option.value
-                                    )
-                                );
-                            }
-                        }}
-                        className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                    />
+                <option key={index} value={option.value}>
                     {option.label}
-                </label>
+                </option>
             ))}
-        </div>
+        </select>
+        {/* <input
+            type="checkbox"
+            className="ml-2 h-4 w-4 text-blue-600 border-gray-300 rounded"
+        /> */}
     </div>
 </label>
-
-
 
 
             <button

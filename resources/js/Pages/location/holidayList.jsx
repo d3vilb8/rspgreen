@@ -3,25 +3,30 @@ import { Inertia } from '@inertiajs/inertia';
 import Header from '@/Layouts/Header';
 import Nav from '@/Layouts/Nav';
 
-export default function LeadStages({ leadStage = [] }) {
+export default function HolidayLocations({ holidays = [] }) {
     const [isModalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState('create'); // 'create' or 'edit'
-    const [selectedStage, setSelectedStage] = useState(null);
-  
-    const openModal = (type, stage = null) => {
+    const [selectedHoliday, setSelectedHoliday] = useState(null);
+
+    console.log("jhgf", holidays);
+
+    // Open modal for create or edit
+    const openModal = (type, holiday = null) => {
         setModalType(type);
-        setSelectedStage(stage);
+        setSelectedHoliday(holiday);
         setModalOpen(true);
     };
 
+    // Close modal and reset selected holiday
     const closeModal = () => {
         setModalOpen(false);
-        setSelectedStage(null);
+        setSelectedHoliday(null);
     };
 
-    const deleteStage = (id) => {
-        if (confirm('Are you sure you want to delete this stage?')) {
-            Inertia.delete(`/project-all-stages/${id}`);
+    // Delete holiday
+    const deleteHoliday = (id) => {
+        if (confirm('Are you sure you want to delete this holiday location?')) {
+            Inertia.delete(`/holiday-locationswise/${id}`);
         }
     };
 
@@ -42,52 +47,51 @@ export default function LeadStages({ leadStage = [] }) {
 
                 {/* Main Content */}
                 <div className="w-3/4 p-6 bg-gray-100">
-                    <h1 className="text-2xl font-semibold mb-4">Total Stages</h1>
+                    <h1 className="text-2xl font-semibold mb-4">Holiday Locations</h1>
                     <button
                         onClick={() => openModal('create')}
                         className="text-green-600 font-medium hover:underline mb-4 block"
                     >
-                        Create Stage
+                        Create Holiday Location
                     </button>
 
                     <table className="w-full bg-white rounded shadow">
                         <thead>
                             <tr className="bg-gray-200 text-left">
-                                <th className="px-4 py-2">Stage Name</th>
-                                <th className="px-4 py-2">Stage Amount</th> {/* Added Amount Column */}
+                                <th className="px-4 py-2">Holiday Location</th>
                                 <th className="px-4 py-2">Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {leadStage.map((stage) => (
-                                <tr key={stage.id} className="border-b">
-                                    <td className="px-4 py-2">{stage.name}</td>
-                                    <td className="px-4 py-2">{stage.ammount}</td> {/* Display the Amount */}
-                                    <td className="px-4 py-2">
-                                        <button
-                                            onClick={() => openModal('edit', stage)}
-                                            className="text-blue-500 hover:underline mr-4"
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            onClick={() => deleteStage(stage.id)}
-                                            className="text-red-500 hover:underline"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
+  {holidays.map((holiday, index) => (
+    <tr key={index} className="border-b">
+      <td className="px-4 py-2">{holiday.name || holiday}</td>
+      <td className="px-4 py-2">
+        <button
+          onClick={() => openModal('edit', { id: index, name: holiday })}
+          className="text-blue-500 hover:underline mr-4"
+        >
+          Edit
+        </button>
+        <button
+          onClick={() => deleteHoliday(index)}
+          className="text-red-500 hover:underline"
+        >
+          Delete
+        </button>
+      </td>
+    </tr>
+  ))}
+</tbody>
+
                     </table>
                 </div>
 
-                {/* Modal */}
+                {/* Modal for Create/Edit Holiday */}
                 {isModalOpen && (
-                    <StageModal
+                    <HolidayModal
                         type={modalType}
-                        stage={selectedStage}
+                        holiday={selectedHoliday}
                         onClose={closeModal}
                     />
                 )}
@@ -96,40 +100,34 @@ export default function LeadStages({ leadStage = [] }) {
     );
 }
 
-function StageModal({ type, stage, onClose }) {
-    const [form, setForm] = useState({ name: stage?.name || '', amount: stage?.amount || '' });
+function HolidayModal({ type, holiday, onClose }) {
+    const [form, setForm] = useState({ name: holiday?.name || '' });
 
+    // Handle form input changes
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
 
+    // Handle form submit
     const handleSubmit = (e) => {
         e.preventDefault();
         if (type === 'create') {
-            Inertia.post('/project-all-stages', form);
+            Inertia.post('/holiday-locationswise', form);
         } else if (type === 'edit') {
-            Inertia.put(`/project-all-stages/${stage.id}`, form);
+            Inertia.put(`/holiday-locationswise/${holiday.id}`, form);
         }
         onClose();
     };
 
     return (
-        <Modal title={type === 'create' ? 'Create Stage' : 'Edit Stage'} onClose={onClose}>
+        <Modal title={type === 'create' ? 'Create Holiday Location' : 'Edit Holiday Location'} onClose={onClose}>
             <form onSubmit={handleSubmit}>
-                <label className="block mb-2 text-sm font-medium">Stage Name</label>
+                <label className="block mb-2 text-sm font-medium">Holiday Location Name</label>
                 <input
                     type="text"
                     name="name"
                     className="w-full border px-4 py-2 rounded focus:outline-none"
                     value={form.name}
-                    onChange={handleChange}
-                />
-                <label className="block mt-4 mb-2 text-sm font-medium">Stage Amount</label>
-                <input
-                    type="number"
-                    name="amount"
-                    className="w-full border px-4 py-2 rounded focus:outline-none"
-                    value={form.amount}
                     onChange={handleChange}
                 />
                 <button

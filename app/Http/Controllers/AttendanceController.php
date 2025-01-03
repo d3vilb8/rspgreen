@@ -24,6 +24,7 @@ class AttendanceController extends Controller
         $notif = Auth::user()->notifications;
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id')->get();
+            // dd($employees);
         $attendances = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->join('attendances', 'attendances.employee_id', '=', 'users.id')
             ->select('users.name', 'attendances.id', 'attendances.date', 'attendances.in_time', 'attendances.out_time')->get();
