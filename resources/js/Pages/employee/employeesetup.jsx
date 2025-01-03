@@ -18,7 +18,12 @@ const TableComponent = ({
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [selectedBranchId, setSelectedBranchId] = useState(null);
     const [branches, setBranches] = useState([]);
-
+    const options = [
+        { value: 1, label: "pinaki roy" },
+        { value: 2, label: "Ella Schultz" },
+       
+    ];
+    
     const notyf = new Notyf();
 
     const { data, setData, post, reset, errors } = useForm({
@@ -85,35 +90,55 @@ const TableComponent = ({
 
     const handleTransferBranch = (e) => {
         e.preventDefault();
-        // console.log("Transferring branch with ID:", data.current_branch);
-
-        post(`/branches-transfer/${selectedBranchId}`, {
+    
+        post(`/branches-transfer/${data.current_branch}`, {
             data: {
-                id: selectedBranchId,
+                transfer_to: data.transfer_to,
+                employees: data.selectedEmployees, // Include selected employees
             },
             onSuccess: () => {
-                notyf.success("Branch transferred successfully!");
+                notyf.success("Employees transferred successfully!");
                 fetchBranches();
                 closeTransferModal();
             },
             onError: () => {
-                notyf.error("An error occurred while transferring the branch.");
+                notyf.error("An error occurred while transferring employees.");
             },
         });
     };
-
-    const handleDeleteBranch = async (id) => {
-        if (confirm("Are you sure you want to delete this branch?")) {
+    
+    
+    const handleDeleteBranch = async (id, hasEmployees) => {
+        if (hasEmployees) {
+            notyf.error("This branch has employees, so deletion is not allowed.");
+            return;
+        } else if (confirm("Are you sure you want to delete this branch?")) {
             try {
+                console.log("Attempting to delete branch with ID:", id); 
                 await axios.delete(`/branches/${id}`);
                 notyf.success("Branch deleted successfully!");
-                fetchBranches();
+                
+                window.location.reload();
+                setBranches(prevBranches => {
+                    if (Array.isArray(prevBranches)) {
+                        return prevBranches.filter(branch => branch.id !== id);
+                    } else {
+                        return []; 
+                    }
+                });
             } catch (error) {
                 console.error("Error deleting branch:", error);
-                notyf.error("An error occurred while deleting the branch.");
+                if (error.response && error.response.status === 404) {
+                    notyf.error("Branch not found. Deletion failed.");
+                } else {
+                    notyf.error("An error occurred while deleting the branch.");
+                }
             }
         }
     };
+    
+    
+    
 
     return (
         <div className="w-[85.2%] absolute right-0">
@@ -135,63 +160,64 @@ const TableComponent = ({
                     </div>
 
                     <div className="mt-3">
-                        <table className="min-w-full border border-gray-300">
-                            <thead className="bg-gray-200">
-                                <tr>
-                                    <th className="px-4 py-2 text-left border-b">
-                                        Branch Name
-                                    </th>
-                                    <th className="px-4 py-2 text-right border-b">
-                                        Action
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {branchesa.map((branch) => (
-                                    <tr
-                                        key={branch.id}
-                                        className="transition duration-200 hover:bg-gray-100"
-                                    >
-                                        <td className="px-4 py-2 border-b">
-                                            {branch.name}
-                                        </td>
-                                        <td className="px-4 py-2 text-right border-b">
-                                            <button
-                                                onClick={() =>
-                                                    openModal(branch)
-                                                }
-                                                className="text-blue-600 underline hover:text-blue-800"
-                                            >
-                                                Edit
-                                            </button>
-                                            {branch.empCount !== 0 && (
-                                                <button
-                                                    onClick={() =>
-                                                        openTransferModal(
-                                                            branch.id
-                                                        )
-                                                    }
-                                                    className="ml-4 text-green-600 underline hover:text-green-800"
-                                                >
-                                                    Transfer
-                                                </button>
-                                            )}
-                                            <button
-                                                onClick={() =>
-                                                    handleDeleteBranch(
-                                                        branch.id
-                                                    )
-                                                }
-                                                className="ml-4 text-red-600 underline hover:text-red-800"
-                                            >
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+    <table className="min-w-full border border-gray-300">
+        <thead className="bg-gray-200">
+            <tr>
+                <th className="px-4 py-2 text-left border-b">
+                    Branch Name
+                </th>
+                {/* <th className="px-4 py-2 text-left border-b">
+                    Quantity
+                </th> */}
+                <th className="px-4 py-2 text-left border-b">
+                 Total Employees 
+                </th>
+                <th className="px-4 py-2 text-right border-b">
+                    Action
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {branchesa.map((branch) => (
+                <tr
+                    key={branch.id}
+                    className="transition duration-200 hover:bg-gray-100"
+                >
+                    <td className="px-4 py-2 border-b">
+                        {branch.name}
+                    </td>
+                    <td className="px-4 py-2 text-center border-b">
+                        {branch.empCount}
+                    </td>
+                    <td className="px-4 py-2 text-right border-b">
+                        <button
+                            onClick={() => openModal(branch)}
+                            className="text-blue-600 underline hover:text-blue-800"
+                        >
+                            Edit
+                        </button>
+                        {branch.empCount !== 0 && (
+                            <button
+                                onClick={() => openTransferModal(branch.id)}
+                                className="ml-4 text-green-600 underline hover:text-green-800"
+                            >
+                                Transfer
+                            </button>
+                        )}
+                        <button
+                            onClick={() => handleDeleteBranch(branch.id, branch.empCount > 0)}
+                            className="ml-4 text-red-600 underline hover:text-red-800"
+                        >
+                            Delete
+                        </button>
+                    </td>
+                   
+                </tr>
+            ))}
+        </tbody>
+    </table>
+</div>
+
                 </div>
             </div>
             {/* Create/Edit Modal */}
@@ -237,52 +263,93 @@ const TableComponent = ({
 
             {/* Transfer Modal */}
             <Modal show={isTransferModalOpen} onClose={closeTransferModal}>
-                <div className="p-6">
-                    <h2 className="text-lg font-bold">Transfer Branch</h2>
-                    <form onSubmit={handleTransferBranch} className="mt-4">
-                        <label className="block mb-2">
-                            Transfer To:
-                            <select
-                                value={data.transfer_to}
-                                onChange={(e) =>
-                                    setData("transfer_to", e.target.value)
-                                }
-                                className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-                            >
-                                <option value="" disabled>
-                                    Select a branch
-                                </option>
-                                {branchesa
-                                    ?.filter(
-                                        (branch) =>
-                                            branch.id !== data.current_branch
+    <div className="p-6">
+        <h2 className="text-lg font-bold">Transfer Branch</h2>
+        <form onSubmit={handleTransferBranch} className="mt-4">
+            <label className="block mb-2">
+                Transfer To:
+                <select
+                    value={data.transfer_to}
+                    onChange={(e) => setData("transfer_to", e.target.value)}
+                    className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+                >
+                    <option value="" disabled>
+                        Select a branch
+                    </option>
+                    {branchesa
+                        ?.filter((branch) => branch.id !== data.current_branch)
+                        .map((branch) => (
+                            <option key={branch.id} value={branch.id}>
+                                {branch.name}
+                            </option>
+                        ))}
+                </select>
+            </label>
+
+            {/* Quantity Input Field */}
+            <label className="block mb-2 mt-4">
+    Employee Name
+    <div className="flex items-center mt-1 relative">
+        <div className="block w-full p-2 border border-gray-300 rounded-md cursor-pointer">
+            Select Options
+        </div>
+        <div className="absolute mt-1 w-full border border-gray-300 rounded-md bg-white z-10">
+            {options.map((option, index) => (
+                <label
+                    key={index}
+                    className="flex items-center p-2 hover:bg-gray-100 cursor-pointer"
+                >
+                    <input
+                        type="checkbox"
+                        value={option.value}
+                        onChange={(e) => {
+                            // Handle checkbox state change here
+                            const isChecked = e.target.checked;
+                            if (isChecked) {
+                                // Add value to selected list
+                                setData("quantity", [
+                                    ...(data.quantity || []),
+                                    option.value,
+                                ]);
+                            } else {
+                                // Remove value from selected list
+                                setData(
+                                    "quantity",
+                                    (data.quantity || []).filter(
+                                        (value) => value !== option.value
                                     )
-                                    .map((branch) => (
-                                        <option
-                                            key={branch.id}
-                                            value={branch.id}
-                                        >
-                                            {branch.name}
-                                        </option>
-                                    ))}
-                            </select>
-                        </label>
-                        <button
-                            type="submit"
-                            className="p-2 mt-2 text-white bg-green-600 rounded-md"
-                        >
-                            Transfer
-                        </button>
-                        <button
-                            onClick={closeTransferModal}
-                            type="button"
-                            className="p-2 mt-2 text-white bg-red-600 rounded-md"
-                        >
-                            Close
-                        </button>
-                    </form>
-                </div>
-            </Modal>
+                                );
+                            }
+                        }}
+                        className="mr-2 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                    />
+                    {option.label}
+                </label>
+            ))}
+        </div>
+    </div>
+</label>
+
+
+
+
+            <button
+                type="submit"
+                className="p-2 mt-2 text-white bg-green-600 rounded-md"
+            >
+                Transfer
+            </button>
+            <button
+                onClick={closeTransferModal}
+                type="button"
+                className="p-2 mt-2 text-white bg-red-600 rounded-md"
+            >
+                Close
+            </button>
+        </form>
+    </div>
+</Modal>
+
         </div>
     );
 };

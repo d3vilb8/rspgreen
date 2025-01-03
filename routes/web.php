@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::middleware('check_permission')->group(function () {
+   
 
 
         Route::get('/', [AdminController::class, 'index']);
@@ -230,8 +231,10 @@ Route::resource('branches', EmpolyeeSetupController::class);
 Route::post('branches-update/{id}', [EmpolyeeSetupController::class, 'update']);
 Route::resource('departments', DepartmentController::class);
 Route::resource('branches', EmpolyeeSetupController::class);
-Route::post('branches-transfer/{id}', [EmpolyeeSetupController::class, 'transfer']);
-
+// Route::post('branches-transfer/{id}', [EmpolyeeSetupController::class, 'transfer']);
+Route::post('/branches-transfer/{branchId}', [EmpolyeeSetupController::class, 'transferEmployees']);
+// Add a new route for deletion with transfer
+// Route::post('/branches/{id}/delete', [EmpolyeeSetupController::class, 'destroyWithTransfer']);
 
 
 Route::post('departments/{id}', [DepartmentController::class, 'update']);
