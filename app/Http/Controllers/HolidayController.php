@@ -1,9 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\Holiday;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class HolidayController extends Controller
 {
@@ -11,10 +12,11 @@ class HolidayController extends Controller
     {
         // Get all holidays
         $holidays = Holiday::all();
-
+        $vacations = DB::table('locations_holiday')->pluck('name');
         // Return Inertia view with holidays data
         return Inertia::render('location/index', [
             'holidays' => $holidays,
+            'vacations' => $vacations
         ]);
     }
 
@@ -47,7 +49,7 @@ class HolidayController extends Controller
             'name' => 'required|string',
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
-            'location' => 'required|string',
+            // 'location' => 'required|string',
         ]);
 
         // Update the holiday
@@ -100,12 +102,12 @@ class HolidayController extends Controller
         // Fetch holidays
         $holidays = $holidays->get();
 
-        // If no holidays are found, log the information
+       
         if ($holidays->isEmpty()) {
             \Log::info("No holidays found for location: " . $location);
         }
 
-        // Return holidays and locations to the frontend
+      
         return Inertia::render('location/holidayCalender', [
             'holidays' => $holidays->isEmpty() ? [] : $holidays->toArray(),
             'locations' => $locations,

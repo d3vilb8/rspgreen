@@ -2,19 +2,47 @@ import React, { useState, useEffect } from 'react';
 import Header from '@/Layouts/Header';
 import Nav from '@/Layouts/Nav';
 
-const Product = ({ user, notif, user_type, holidays, }) => {
+const Product = ({ user, notif, user_type, holidays, vacations }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [location, setLocation] = useState('');
   const [currentItem, setCurrentItem] = useState(null);
   const [csrfToken, setCsrfToken] = useState('');
+  const [errors, setErrors] = useState({});
+
+  console.log('vacations:', vacations);
 
   // Fetch CSRF Token (ensure it's available)
   useEffect(() => {
     const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     setCsrfToken(token);
   }, []);
+
+  const handleChange = (event) => {
+    const selectedLocation = event.target.value;
+    setLocation(selectedLocation);
+    console.log("Selected Location:", selectedLocation);
+  };
+
+  // Form validation
+  const validateForm = () => {
+    const newErrors = {};
+    if (!holidayName) newErrors.name = 'Holiday Name is required';
+    if (!startDate) newErrors.start_date = 'Start Date is required';
+    if (!endDate) newErrors.end_date = 'End Date is required';
+    if (!location) newErrors.location = 'Location is required';
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Handle form submission
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      handleSubmit({ holidayName, startDate, endDate, location });
+    }
+  };
 
   // Extract unique locations dynamically from the holidays data
   const uniqueLocations = Array.from(new Set(holidays.map(item => item.location)));
@@ -111,15 +139,14 @@ const Product = ({ user, notif, user_type, holidays, }) => {
 
     // Basic Validation
     if (!formData.get('name') || !formData.get('start_date') || !formData.get('end_date') || !formData.get('location')) {
+      console.error('Validation failed: All fields are required.');
       alert('Please fill in all fields.');
       return;
     }
 
     if (isEditMode && currentItem) {
-      // Update the holiday if in edit mode
       updateHoliday(currentItem.id, formData);
     } else {
-      // Create a new holiday
       createHoliday(formData);
     }
   };
@@ -151,7 +178,7 @@ const Product = ({ user, notif, user_type, holidays, }) => {
               onChange={(e) => setLocation(e.target.value)}
             >
               <option value="">Select Location</option>
-              {uniqueLocations.map((loc, index) => (
+              {vacations.map((loc, index) => (
                 <option key={index} value={loc}>
                   {loc}
                 </option>
@@ -175,7 +202,7 @@ const Product = ({ user, notif, user_type, holidays, }) => {
                 <th className="px-4 py-2 text-left border-b">Start Date</th>
                 <th className="px-4 py-2 text-left border-b">End Date</th>
                 <th className="px-4 py-2 text-left border-b">Location</th>
-                <th className="px-4 py-2 text-left border-b">Actions</th>
+                {/* <th className="px-4 py-2 text-left border-b">Actions</th> */}
               </tr>
             </thead>
             <tbody>
@@ -186,7 +213,7 @@ const Product = ({ user, notif, user_type, holidays, }) => {
                     <td className="px-4 py-2 border-b">{item.start_date}</td>
                     <td className="px-4 py-2 border-b">{item.end_date}</td>
                     <td className="px-4 py-2 border-b">{item.location}</td>
-                    <td className="px-4 py-2 border-b">
+                    {/* <td className="px-4 py-2 border-b">
                       <button
                         className="bg-yellow-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-yellow-600"
                         onClick={() => handleOpenModal(item)}
@@ -199,7 +226,7 @@ const Product = ({ user, notif, user_type, holidays, }) => {
                       >
                         Delete
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
@@ -255,35 +282,34 @@ const Product = ({ user, notif, user_type, holidays, }) => {
                   />
                 </div>
                 <div className="mb-4">
-    <label className="block mb-2">Location</label>
-    <select
-        value={location}
-        onChange={(e) => setData('location', e.target.value)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-md"
-    >
-        <option value="" disabled>Select a location</option>
-        {holidays.map((holiday, index) => (
-            <option key={index} value={holiday.name || holiday}>
-                {holiday.name || holiday}
-            </option>
-        ))}
-    </select>
-    {/* {errors.location && <p className="text-red-500">{errors.location}</p>} */}
-</div>
-
-                <div className="flex justify-end">
+                  <label className="block mb-2">Location</label>
+                  <select
+                    value={location}
+                    onChange={handleChange}
+                    className="border border-gray-300 rounded-md px-4 py-2 w-full"
+                    name="location"
+                  >
+                    <option value="">Select Location</option>
+                    {vacations.map((loc, index) => (
+                      <option key={index} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex justify-end gap-4">
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+                  >
+                    {isEditMode ? 'Update Holiday' : 'Create Holiday'}
+                  </button>
                   <button
                     type="button"
-                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md mr-2"
+                    className="bg-gray-300 text-black px-6 py-2 rounded-md"
                     onClick={handleCloseModal}
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                  >
-                    {isEditMode ? 'Save Changes' : 'Add Holiday'}
                   </button>
                 </div>
               </form>

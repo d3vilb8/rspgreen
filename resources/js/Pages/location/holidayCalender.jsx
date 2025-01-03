@@ -5,12 +5,12 @@ import axios from 'axios';
 import Header from '@/Layouts/Header';
 import Nav from '@/Layouts/Nav';
 
-function HolidayCalendar({ notif, usrrr, user_type, user, location, holidays, locations }) {
+function HolidayCalendar({ notif, usrrr, user_type, user, location, holidays, locations,vacations }) {
     const [calendarHolidays, setCalendarHolidays] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState(location || '');
     const [locationList, setLocationList] = useState(locations || []);  // Ensure locations are passed correctly
 
-    console.log("Selected Location:", selectedLocation);
+    console.log("Selected Location:", vacations);
 
     useEffect(() => {
         // Function to fetch holidays from backend

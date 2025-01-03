@@ -72,25 +72,30 @@ class EmpolyeeSetupController extends Controller
         $targetBranchId = $request->input('transfer_to');
         $quantity = $request->input('quantity'); 
     
-        // Retrieve employee names and their user IDs using a join
+       
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
-            ->select('users.name', 'users.id')  // Selecting employee name and user ID
+            ->select('users.name', 'users.id')  
             ->where('employees.branch_id', $branchId)
             ->limit($quantity)
             ->get();
+            // dd($employees);
     
         if ($employees->isEmpty()) {
-            return redirect()->back()->with('error', 'Not enough employees to transfer.');
+            return response()->json([
+                'error' => 'Not enough employees to transfer.'
+            ], 400); 
         }
     
-        // Update the branch_id for the selected employees
+       
         foreach ($employees as $employee) {
-            Employee::where('user_id', $employee->id)  // Update based on user ID
+            Employee::where('user_id', $employee->id)  
                 ->update(['branch_id' => $targetBranchId]);
         }
     
-        return redirect()->back()->with('success', 'Employees transferred successfully!');
+        return response()->json([
+            'success' => 'Employees transferred successfully!',
+            'employees' => $employees  
+        ]);
     }
-    
     
 }

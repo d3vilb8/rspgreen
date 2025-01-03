@@ -3,12 +3,12 @@ import { Inertia } from '@inertiajs/inertia';
 import Header from '@/Layouts/Header';
 import Nav from '@/Layouts/Nav';
 
-export default function HolidayLocations({ holidays = [] }) {
+export default function HolidayLocations({ vacations = [] }) {
     const [isModalOpen, setModalOpen] = useState(false);
     const [modalType, setModalType] = useState('create'); // 'create' or 'edit'
     const [selectedHoliday, setSelectedHoliday] = useState(null);
 
-    console.log("jhgf", holidays);
+    console.log("jhgf", vacations);
 
     // Open modal for create or edit
     const openModal = (type, holiday = null) => {
@@ -63,7 +63,7 @@ export default function HolidayLocations({ holidays = [] }) {
                             </tr>
                         </thead>
                         <tbody>
-  {holidays.map((holiday, index) => (
+  {vacations.map((holiday, index) => (
     <tr key={index} className="border-b">
       <td className="px-4 py-2">{holiday.name || holiday}</td>
       <td className="px-4 py-2">

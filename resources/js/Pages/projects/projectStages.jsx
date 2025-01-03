@@ -97,7 +97,7 @@ export default function LeadStages({ leadStage = [] }) {
 }
 
 function StageModal({ type, stage, onClose }) {
-    const [form, setForm] = useState({ name: stage?.name || '', amount: stage?.amount || '' });
+    const [form, setForm] = useState({ name: stage?.name || '', ammount: stage?.ammount || '' });
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -127,9 +127,9 @@ function StageModal({ type, stage, onClose }) {
                 <label className="block mt-4 mb-2 text-sm font-medium">Stage Amount</label>
                 <input
                     type="number"
-                    name="amount"
+                    name="ammount"
                     className="w-full border px-4 py-2 rounded focus:outline-none"
-                    value={form.amount}
+                    value={form.ammount}
                     onChange={handleChange}
                 />
                 <button

@@ -12,8 +12,9 @@ const TableComponent = ({
     notif,
     user_type,
     branchesa,
-    employees,
+   
     searchEmpCount,
+    employees =[]
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
@@ -25,7 +26,7 @@ const TableComponent = ({
         { value: 3, label: "ami" },
        
     ];
-    console.log("kjhgf",employees)
+    console.log("kjhgf",user_type)
     
     const notyf = new Notyf();
 
@@ -97,18 +98,23 @@ const TableComponent = ({
         post(`/branches-transfer/${data.current_branch}`, {
             data: {
                 transfer_to: data.transfer_to,
-                employees: data.selectedEmployees, // Include selected employees
+                employees: data.selectedEmployees,
             },
-            onSuccess: () => {
-                notyf.success("Employees transferred successfully!");
-                fetchBranches();
-                closeTransferModal();
+            onSuccess: (response) => {
+                // Assuming response contains 'employees' data
+                // console.log("Employees transferred successfully:", response.employees);  // Log the employees
+    
+                if (response.employees) {
+                    console.log("Employee data:", response.employees);
+                }
             },
-            onError: () => {
+            onError: (error) => {
                 notyf.error("An error occurred while transferring employees.");
+                console.log(error);
             },
         });
     };
+    
     
     
     const handleDeleteBranch = async (id, hasEmployees) => {
