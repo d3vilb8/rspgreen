@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Inertia } from '@inertiajs/inertia';
-import Header from '@/Layouts/Header';
-import Nav from '@/Layouts/Nav';
+import React, { useState } from "react";
+import { Inertia } from "@inertiajs/inertia";
+import Header from "@/Layouts/Header";
+import Nav from "@/Layouts/Nav";
 
 export default function LeadStages({ leadStage = [] }) {
     const [isModalOpen, setModalOpen] = useState(false);
-    const [modalType, setModalType] = useState('create'); // 'create' or 'edit'
+    const [modalType, setModalType] = useState("create"); // 'create' or 'edit'
     const [selectedStage, setSelectedStage] = useState(null);
-  
+
     const openModal = (type, stage = null) => {
         setModalType(type);
         setSelectedStage(stage);
@@ -20,7 +20,7 @@ export default function LeadStages({ leadStage = [] }) {
     };
 
     const deleteStage = (id) => {
-        if (confirm('Are you sure you want to delete this stage?')) {
+        if (confirm("Are you sure you want to delete this stage?")) {
             Inertia.delete(`/project-all-stages/${id}`);
         }
     };
@@ -33,7 +33,9 @@ export default function LeadStages({ leadStage = [] }) {
                 {/* Sidebar */}
                 <aside className="w-1/4 bg-gray-800 text-white p-4">
                     <ul className="space-y-4">
-                        <li className="font-semibold border-b border-gray-500 pb-2">Branch</li>
+                        <li className="font-semibold border-b border-gray-500 pb-2">
+                            Branch
+                        </li>
                         <li>Department</li>
                         <li>Designation</li>
                         <li>Leave Type</li>
@@ -42,9 +44,11 @@ export default function LeadStages({ leadStage = [] }) {
 
                 {/* Main Content */}
                 <div className="w-3/4 p-6 bg-gray-100">
-                    <h1 className="text-2xl font-semibold mb-4">Total Stages</h1>
+                    <h1 className="text-2xl font-semibold mb-4">
+                        Total Stages
+                    </h1>
                     <button
-                        onClick={() => openModal('create')}
+                        onClick={() => openModal("create")}
                         className="text-green-600 font-medium hover:underline mb-4 block"
                     >
                         Create Stage
@@ -54,7 +58,10 @@ export default function LeadStages({ leadStage = [] }) {
                         <thead>
                             <tr className="bg-gray-200 text-left">
                                 <th className="px-4 py-2">Stage Name</th>
-                                <th className="px-4 py-2">Stage Amount</th> {/* Added Amount Column */}
+                                <th className="px-4 py-2">
+                                    Stage Amount Percentage
+                                </th>{" "}
+                                {/* Added Amount Column */}
                                 <th className="px-4 py-2">Action</th>
                             </tr>
                         </thead>
@@ -62,16 +69,23 @@ export default function LeadStages({ leadStage = [] }) {
                             {leadStage.map((stage) => (
                                 <tr key={stage.id} className="border-b">
                                     <td className="px-4 py-2">{stage.name}</td>
-                                    <td className="px-4 py-2">{stage.ammount}</td> {/* Display the Amount */}
+                                    <td className="px-4 py-2">
+                                        {stage.ammount}
+                                    </td>{" "}
+                                    {/* Display the Amount */}
                                     <td className="px-4 py-2">
                                         <button
-                                            onClick={() => openModal('edit', stage)}
+                                            onClick={() =>
+                                                openModal("edit", stage)
+                                            }
                                             className="text-blue-500 hover:underline mr-4"
                                         >
                                             Edit
                                         </button>
                                         <button
-                                            onClick={() => deleteStage(stage.id)}
+                                            onClick={() =>
+                                                deleteStage(stage.id)
+                                            }
                                             className="text-red-500 hover:underline"
                                         >
                                             Delete
@@ -97,7 +111,10 @@ export default function LeadStages({ leadStage = [] }) {
 }
 
 function StageModal({ type, stage, onClose }) {
-    const [form, setForm] = useState({ name: stage?.name || '', ammount: stage?.ammount || '' });
+    const [form, setForm] = useState({
+        name: stage?.name || "",
+        ammount: stage?.ammount || "",
+    });
 
     const handleChange = (e) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -105,18 +122,23 @@ function StageModal({ type, stage, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (type === 'create') {
-            Inertia.post('/project-all-stages', form);
-        } else if (type === 'edit') {
+        if (type === "create") {
+            Inertia.post("/project-all-stages", form);
+        } else if (type === "edit") {
             Inertia.put(`/project-all-stages/${stage.id}`, form);
         }
         onClose();
     };
 
     return (
-        <Modal title={type === 'create' ? 'Create Stage' : 'Edit Stage'} onClose={onClose}>
+        <Modal
+            title={type === "create" ? "Create Stage" : "Edit Stage"}
+            onClose={onClose}
+        >
             <form onSubmit={handleSubmit}>
-                <label className="block mb-2 text-sm font-medium">Stage Name</label>
+                <label className="block mb-2 text-sm font-medium">
+                    Stage Name
+                </label>
                 <input
                     type="text"
                     name="name"
@@ -124,7 +146,9 @@ function StageModal({ type, stage, onClose }) {
                     value={form.name}
                     onChange={handleChange}
                 />
-                <label className="block mt-4 mb-2 text-sm font-medium">Stage Amount</label>
+                <label className="block mt-4 mb-2 text-sm font-medium">
+                    Stage Amount
+                </label>
                 <input
                     type="number"
                     name="ammount"
@@ -136,7 +160,7 @@ function StageModal({ type, stage, onClose }) {
                     type="submit"
                     className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                    {type === 'create' ? 'Submit' : 'Update'}
+                    {type === "create" ? "Submit" : "Update"}
                 </button>
             </form>
         </Modal>
@@ -149,7 +173,9 @@ function Modal({ title, children, onClose }) {
             <div className="bg-white w-full max-w-md p-6 rounded shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-lg font-semibold">{title}</h2>
-                    <button onClick={onClose} className="text-gray-600">X</button>
+                    <button onClick={onClose} className="text-gray-600">
+                        X
+                    </button>
                 </div>
                 {children}
             </div>

@@ -13,6 +13,10 @@ class EmpolyeeSetupController extends Controller
     // Display the branches with employee counts
     public function index()
     {
+        $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
+            ->select('users.name', 'users.id')
+            ->get();
+
         $branches = Branch::all()->map(function ($branch) {
             $branch->empCount = Employee::where('branch_id', $branch->id)->count();
             return $branch;
@@ -20,6 +24,7 @@ class EmpolyeeSetupController extends Controller
 
         return Inertia::render('employee/employeesetup', [
             'branchesa' => $branches,
+            'employees' => $employees,
         ]);
     }
 
@@ -68,34 +73,33 @@ class EmpolyeeSetupController extends Controller
             'transfer_to' => 'required|exists:branches,id',
             'quantity' => 'required',
         ]);
-    
+
         $targetBranchId = $request->input('transfer_to');
-        $quantity = $request->input('quantity'); 
-    
-       
+        $quantity = $request->input('quantity');
+
+
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
-            ->select('users.name', 'users.id')  
+            ->select('users.name', 'users.id')
             ->where('employees.branch_id', $branchId)
             ->limit($quantity)
             ->get();
-            // dd($employees);
-    
+        // dd($employees);
+
         if ($employees->isEmpty()) {
             return response()->json([
                 'error' => 'Not enough employees to transfer.'
-            ], 400); 
+            ], 400);
         }
-    
-       
+
+
         foreach ($employees as $employee) {
-            Employee::where('user_id', $employee->id)  
+            Employee::where('user_id', $employee->id)
                 ->update(['branch_id' => $targetBranchId]);
         }
-    
+
         return response()->json([
             'success' => 'Employees transferred successfully!',
-            'employees' => $employees  
+            'employees' => $employees
         ]);
     }
-    
 }
