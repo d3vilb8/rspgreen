@@ -65,41 +65,43 @@ class EmpolyeeSetupController extends Controller
 
         return response()->json(['message' => 'Branch deleted successfully!']);
     }
-
+   
 
     public function transferEmployees(Request $request, $branchId)
     {
         $request->validate([
             'transfer_to' => 'required|exists:branches,id',
-            'quantity' => 'required',
+            'employee_id' => 'required|exists:employees,user_id',
         ]);
-
+    
         $targetBranchId = $request->input('transfer_to');
-        $quantity = $request->input('quantity');
-
-
-        $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
-            ->select('users.name', 'users.id')
-            ->where('employees.branch_id', $branchId)
-            ->limit($quantity)
-            ->get();
-        // dd($employees);
-
-        if ($employees->isEmpty()) {
-            return response()->json([
-                'error' => 'Not enough employees to transfer.'
-            ], 400);
+        $employeeId = $request->input('employee_id');
+    
+        $employee = Employee::where('user_id', $employeeId)->first();
+    
+        if (!$employee) {
+            return response()->json(['error' => 'Employee not found.'], 400);
         }
-
-
-        foreach ($employees as $employee) {
-            Employee::where('user_id', $employee->id)
-                ->update(['branch_id' => $targetBranchId]);
+    
+        // Check if the employee is already in the target branch
+        if ($employee->branch_id == $targetBranchId) {
+            return response()->json(['error' => 'Employee is already in the target branch.'], 400);
         }
-
+    
+        // Update the branch_id for the selected employee
+        $employee->update(['branch_id' => $targetBranchId]);
+    
         return response()->json([
-            'success' => 'Employees transferred successfully!',
-            'employees' => $employees
+            'success' => 'Employee transferred successfully!',
+            'employee' => $employee,
         ]);
     }
+    
+
+    
+    
 }
+
+
+
+
