@@ -38,6 +38,11 @@ const Nav = ({ user_type, usrrr }) => {
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
         { name: "Attendance", link: "/attendance", perm: "view_salary" },
+        {
+            name: "Salary generator employee wise",
+            link: "/all-salary",
+            perm: "view_salary",
+        },
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];
 

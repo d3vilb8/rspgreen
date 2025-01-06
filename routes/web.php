@@ -47,6 +47,7 @@ use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
+use App\Http\Controllers\CommissionController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -66,7 +67,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::middleware('check_permission')->group(function () {
-   
+
 
 
         Route::get('/', [AdminController::class, 'index']);
@@ -81,6 +82,10 @@ Route::middleware(['auth'])->group(function () {
         // Route::get('/holiday-location',[HolidayWorkController::class,'holidayLocation']);
         // Route::get('holidays-calender',[HolidayWorkController::class,'holidayCalender']);
         Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
+
+        Route::resource('commissions', CommissionController::class);
+
+
         Route::get('/projects-create', [ProjectController::class, 'create']);
         Route::post('/projects-store', [ProjectController::class, 'store']);
         Route::get('/projects-edit/{id}', [ProjectController::class, 'edit']);
@@ -253,6 +258,11 @@ Route::post('/payroll/store/{id}', [ReportController::class, 'payrollStore']);
 
 Route::get('/salaries', [SalaryController::class, 'index']);
 Route::post('/generate-salary', [SalaryController::class, 'generateForAll']);
+// Route::resource('/all-salary', [SalaryController::class, 'show']);
+// Route::resource('/all-salary', SalaryController::class);
+Route::get('/all-salary', [SalaryController::class, 'show']);
+
+
 Route::resource('/clients', ClientController::class,);
 Route::get('/tax', [AccountController::class, 'tax']);
 Route::post('/tax-store', [AccountController::class, 'taxstore']);

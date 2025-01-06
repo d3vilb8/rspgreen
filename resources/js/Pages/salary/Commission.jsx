@@ -7,7 +7,7 @@ const CommissionModal = ({ isOpen, onClose, onSave }) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
-        onSave(data); // Pass data to the parent component
+        onSave(data); 
     };
 
     return (

@@ -1,15 +1,21 @@
 import React, { useState } from "react";
 
-const AllowanceModal = ({ isOpen, onClose, onSave, allowanceOptions }) => {
+const AllowanceModal = ({
+    isOpen,
+    onClose,
+    onSave,
+    allowanceOptions,
+    employees,
+}) => {
     if (!isOpen) return null;
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
         const data = Object.fromEntries(formData);
-        onSave(data); // Pass data to the parent component
+        onSave(data); 
     };
-
+    console.log("alloweance", employees);
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white rounded-lg w-[400px] p-6">
