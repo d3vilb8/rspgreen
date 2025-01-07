@@ -17,5 +17,6 @@ class Salary extends Model
 'status',
 'approved_date',
 'approved_by',
+'total_amount',
     ];
 }

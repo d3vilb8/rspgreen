@@ -14,7 +14,7 @@ import "notyf/notyf.min.css";
 const notyf = new Notyf();
 const SalaryList = ({ salary }) => {
     const [salaries, setSalaries] = useState([]);
-
+console.log("jhgf",salary)
     useEffect(() => {
         const fetchSalaries = async () => {
             const response = await axios.get("/salaries");

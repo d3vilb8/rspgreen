@@ -34,8 +34,13 @@ class EmployeeController extends Controller
     {
         $user = Auth::user()->name;
         // $employee = User::with('employees')->where('type', 2)->get();
+        $users = User::role('Employee')->with(['employees', 'roles'])->get(); 
+        // dd($users);// Returns only users with the role 'writer'
         $employee = User::with(['employees', 'roles'])->where('type', 2)->get();
-        // dd($employee);
+
+
+      
+        
         $user = Auth::user()->name;
         // $user_type = Auth::user()->id;
         $userss = Auth::user();
