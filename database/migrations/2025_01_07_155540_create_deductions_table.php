@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('deductions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('employee_id')->constrained('employees')->onDelete('cascade'); // Assuming an employees table exists
             $table->string('title');
             $table->decimal('amount', 10, 2);
             $table->timestamps();

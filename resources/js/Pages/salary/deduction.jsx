@@ -1,168 +1,167 @@
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
+import React, { useState } from 'react';
+import { Inertia } from '@inertiajs/inertia';
+import Header from '@/Layouts/Header';
+import Nav from '@/Layouts/Nav';
 
-// const DeductionPage = ({ employeeId }) => {
-//   const [deductions, setDeductions] = useState([]);
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [currentDeduction, setCurrentDeduction] = useState({ id: null, title: '', amount: '' });
-//   const [newDeduction, setNewDeduction] = useState({ title: '', amount: '' });
-//   const [loading, setLoading] = useState(false);
+export default function DeductionManagement({ deductions }) {
+    const [isModalOpen, setModalOpen] = useState(false);
+    const [modalType, setModalType] = useState('create'); // 'create' or 'edit'
+    const [selectedDeduction, setSelectedDeduction] = useState(null);
 
-//   // Fetch deductions for the employee
-//   useEffect(() => {
-//     const fetchDeductions = async () => {
-//       setLoading(true);
-//       try {
-//         const response = await axios.get(`deductions/${employeeId}`);
-//         setDeductions(response.data);
-//       } catch (error) {
-//         console.error('Error fetching deductions:', error);
-//       }
-//       setLoading(false);
-//     };
-//     fetchDeductions();
-//   }, [employeeId]);
+    const openModal = (type, deduction = null) => {
+        setModalType(type);
+        setSelectedDeduction(deduction);
+        setModalOpen(true);
+    };
 
-//   // Handle adding a new deduction
-//   const handleAddDeduction = async () => {
-//     try {
-//       const response = await axios.post('/deductions', {
-//         employee_id: employeeId,
-//         title: newDeduction.title,
-//         amount: newDeduction.amount,
-//       });
-//       setDeductions([...deductions, response.data]);
-//       setNewDeduction({ title: '', amount: '' });
-//     } catch (error) {
-//       console.error('Error adding deduction:', error);
-//     }
-//   };
+    const closeModal = () => {
+        setModalOpen(false);
+        setSelectedDeduction(null);
+    };
 
-//   // Handle editing an existing deduction
-//   const handleEditDeduction = (deduction) => {
-//     setCurrentDeduction(deduction);
-//     setIsEditing(true);
-//   };
+    const deleteDeduction = (id) => {
+        if (confirm('Are you sure you want to delete this deduction?')) {
+            Inertia.delete(`/deductions/${id}`);
+        }
+    };
 
-//   const handleUpdateDeduction = async () => {
-//     try {
-//       const response = await axios.put(`/deductions/${currentDeduction.id}`, {
-//         title: currentDeduction.title,
-//         amount: currentDeduction.amount,
-//       });
-//       setDeductions(deductions.map(ded => (ded.id === currentDeduction.id ? response.data : ded)));
-//       setIsEditing(false);
-//       setCurrentDeduction({ id: null, title: '', amount: '' });
-//     } catch (error) {
-//       console.error('Error updating deduction:', error);
-//     }
-//   };
+    return (
+        <>
+            <Header />
+            <Nav />
+            <div className="flex">
+                {/* Sidebar */}
+                <aside className="w-1/4 bg-gray-800 text-white p-4">
+                    <ul className="space-y-4">
+                        <li className="font-semibold border-b border-gray-500 pb-2">Branch</li>
+                        <li>Department</li>
+                        <li>Designation</li>
+                        <li>Leave Type</li>
+                    </ul>
+                </aside>
 
-//   // Handle deleting a deduction
-//   const handleDeleteDeduction = async (id) => {
-//     if (window.confirm('Are you sure you want to delete this deduction?')) {
-//       try {
-//         await axios.delete(`deductions/${id}`);
-//         setDeductions(deductions.filter(ded => ded.id !== id));
-//       } catch (error) {
-//         console.error('Error deleting deduction:', error);
-//       }
-//     }
-//   };
+                {/* Main Content */}
+                <div className="w-3/4 p-6 bg-gray-100">
+                    <h1 className="text-2xl font-semibold mb-4">Salary Deductions</h1>
+                    <button
+                        onClick={() => openModal('create')}
+                        className="text-green-600 font-medium hover:underline mb-4 block"
+                    >
+                        Create Deduction
+                    </button>
 
-//   return (
-//     <div className="max-w-3xl mx-auto border p-6 rounded shadow-lg">
-//       <h1 className="text-xl font-bold mb-4">Employee Deductions</h1>
+                    <table className="w-full bg-white rounded shadow">
+                        <thead>
+                            <tr className="bg-gray-200 text-left">
+                                <th className="px-4 py-2">Deduction Title</th>
+                                <th className="px-4 py-2">Amount</th>
+                                <th className="px-4 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {deductions && deductions.length > 0 ? (
+                                deductions.map((deduction) => (
+                                    <tr key={deduction.id} className="border-b">
+                                        <td className="px-4 py-2">{deduction.title}</td>
+                                        <td className="px-4 py-2">{deduction.amount}</td>
+                                        <td className="px-4 py-2">
+                                            <button
+                                                onClick={() => openModal('edit', deduction)}
+                                                className="text-blue-500 hover:underline mr-4"
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                onClick={() => deleteDeduction(deduction.id)}
+                                                className="text-red-500 hover:underline"
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="3" className="text-center py-4 text-gray-500">
+                                        No deductions found.
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
 
-//       <div className="mb-4">
-//         <input
-//           type="text"
-//           className="border p-2 rounded mr-2"
-//           value={newDeduction.title}
-//           onChange={(e) => setNewDeduction({ ...newDeduction, title: e.target.value })}
-//           placeholder="Deduction Title"
-//         />
-//         <input
-//           type="number"
-//           className="border p-2 rounded mr-2"
-//           value={newDeduction.amount}
-//           onChange={(e) => setNewDeduction({ ...newDeduction, amount: e.target.value })}
-//           placeholder="Amount"
-//         />
-//         <button onClick={handleAddDeduction} className="bg-blue-500 text-white p-2 rounded">
-//           Add Deduction
-//         </button>
-//       </div>
+                {/* Modal */}
+                {isModalOpen && (
+                    <DeductionModal
+                        type={modalType}
+                        deduction={selectedDeduction}
+                        onClose={closeModal}
+                    />
+                )}
+            </div>
+        </>
+    );
+}
 
-//       {loading ? (
-//         <p>Loading deductions...</p>
-//       ) : (
-//         <table className="w-full border-collapse border text-left">
-//           <thead>
-//             <tr className="bg-gray-200">
-//               <th className="border p-2">Title</th>
-//               <th className="border p-2">Amount</th>
-//               <th className="border p-2">Actions</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {deductions.map((deduction) => (
-//               <tr key={deduction.id}>
-//                 <td className="border p-2">{deduction.title}</td>
-//                 <td className="border p-2">{deduction.amount}</td>
-//                 <td className="border p-2">
-//                   <button
-//                     onClick={() => handleEditDeduction(deduction)}
-//                     className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-//                   >
-//                     Edit
-//                   </button>
-//                   <button
-//                     onClick={() => handleDeleteDeduction(deduction.id)}
-//                     className="bg-red-500 text-white px-2 py-1 rounded"
-//                   >
-//                     Delete
-//                   </button>
-//                 </td>
-//               </tr>
-//             ))}
-//           </tbody>
-//         </table>
-//       )}
+function DeductionModal({ type, deduction, onClose }) {
+    const [form, setForm] = useState({
+        title: deduction?.title || '',
+        amount: deduction?.amount || '',
+    });
 
-//       {isEditing && (
-//         <div className="mt-6">
-//           <h2 className="text-xl font-bold mb-4">Edit Deduction</h2>
-//           <input
-//             type="text"
-//             className="border p-2 rounded mr-2"
-//             value={currentDeduction.title}
-//             onChange={(e) => setCurrentDeduction({ ...currentDeduction, title: e.target.value })}
-//             placeholder="Deduction Title"
-//           />
-//           <input
-//             type="number"
-//             className="border p-2 rounded mr-2"
-//             value={currentDeduction.amount}
-//             onChange={(e) => setCurrentDeduction({ ...currentDeduction, amount: e.target.value })}
-//             placeholder="Amount"
-//           />
-//           <button
-//             onClick={handleUpdateDeduction}
-//             className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-//           >
-//             Update Deduction
-//           </button>
-//           <button
-//             onClick={() => setIsEditing(false)}
-//             className="bg-gray-500 text-white px-4 py-2 rounded"
-//           >
-//             Cancel
-//           </button>
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
 
-// export default DeductionPage;
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (type === 'create') {
+            Inertia.post('/deductions', form);
+        } else if (type === 'edit') {
+            Inertia.put(`/deductions/${deduction.id}`, form);
+        }
+        onClose();
+    };
+
+    return (
+        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white w-full max-w-md p-6 rounded shadow-lg">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold">
+                        {type === 'create' ? 'Create Deduction' : 'Edit Deduction'}
+                    </h2>
+                    <button onClick={onClose} className="text-gray-600">
+                        X
+                    </button>
+                </div>
+                <form onSubmit={handleSubmit}>
+                    <label className="block mb-2 text-sm font-medium">Title</label>
+                    <input
+                        type="text"
+                        name="title"
+                        className="w-full border px-4 py-2 rounded focus:outline-none"
+                        value={form.title}
+                        onChange={handleChange}
+                        required
+                    />
+                    <label className="block mb-2 text-sm font-medium mt-4">Amount</label>
+                    <input
+                        type="number"
+                        name="amount"
+                        className="w-full border px-4 py-2 rounded focus:outline-none"
+                        value={form.amount}
+                        onChange={handleChange}
+                        required
+                    />
+                    <button
+                        type="submit"
+                        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+                    >
+                        {type === 'create' ? 'Submit' : 'Update'}
+                    </button>
+                </form>
+            </div>
+        </div>
+    );
+}

@@ -46,7 +46,7 @@ const Nav = ({ user_type, usrrr }) => {
         },
         {
             name: "Salary deduction",
-            link: "salary/deductions",
+            link: "/deductions",
             perm: "view_employee"
 
         },

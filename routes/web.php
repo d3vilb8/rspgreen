@@ -361,9 +361,8 @@ Route::resource('lead-sources', LeadSourceController::class);
 // Route::resource('lead-stages', LeadStageController::class);
 Route::get('lead/addStage', [LeadStageController::class, 'index'])->name('lead/addStage');
 Route::resource('lead-stages', LeadStageController::class);
-//
-// // Route::get('/deductions/{employeeId}', [DeductionController::class, 'index']);
-// Route::post('/deductions/{employeeId}', [DeductionController::class, 'index']);
 
-// // Route to add a new deduction
-Route::post('salary/deductions', [DeductionController::class, 'store']);
+Route::get('/deductions', [DeductionController::class, 'index'])->name('deductions.index');
+Route::post('/deductions', [DeductionController::class, 'store'])->name('deductions.store');
+Route::put('/deductions/{id}', [DeductionController::class, 'update'])->name('deductions.update');
+Route::delete('/deductions/{id}', [DeductionController::class, 'destroy'])->name('deductions.destroy');

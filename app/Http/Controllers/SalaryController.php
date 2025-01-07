@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Salary;
+use App\Models\Deduction;
 use App\Models\Attendance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -82,7 +83,9 @@ class SalaryController extends Controller
         $attendanceRecords = Attendance::select('employee_id', 'date', 'in_time', 'out_time')
             ->whereMonth('date', '=', now()->month)
             ->get();
-    
+
+            $deductionsss = Deduction::all();
+        // dd($deductionss);
         // Calculate late days for each employee
         $lateCount = [];
         foreach ($attendanceRecords as $attendance) {
@@ -120,7 +123,7 @@ class SalaryController extends Controller
         }
     
         // Render the data in the view
-        return Inertia::render('salary/salaryAll', compact('salary', 'employees'));
+        return Inertia::render('salary/salaryAll', compact('salary', 'employees', 'deductionsss'));
     }
     
     
