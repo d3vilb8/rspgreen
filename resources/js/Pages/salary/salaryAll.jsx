@@ -9,14 +9,13 @@ const SalaryPage = ({
   user_type,
   employees,
   salary,
-  deductions = [], // Ensure deductions has a default value
+  deductionsss, // Passed from backend
 }) => {
   const [selectedEmployee, setSelectedEmployee] = useState("All Employees");
   const [selectedMonth, setSelectedMonth] = useState("2025-01");
   const [filteredSalaries, setFilteredSalaries] = useState([]);
   const [selectedSalary, setSelectedSalary] = useState(null);
 
-  // Create a mapping of employee IDs to their names
   const nameMap = employees.reduce((acc, emp) => {
     acc[emp.id] = emp.name;
     return acc;
@@ -26,8 +25,6 @@ const SalaryPage = ({
     const calculateSalaries = () => {
       const updatedSalaries = salary?.map((sal) => {
         const generateDate = new Date(sal.generate_date);
-        if (isNaN(generateDate)) return sal;
-
         const daysInMonth = new Date(
           generateDate.getFullYear(),
           generateDate.getMonth() + 1,
@@ -35,8 +32,6 @@ const SalaryPage = ({
         ).getDate();
 
         const totalAmount = parseFloat(sal.total_amount);
-        if (isNaN(totalAmount)) return sal;
-
         const perDaySalary = totalAmount / daysInMonth;
         const hourlySalary = totalAmount / (daysInMonth * 8);
 
@@ -68,10 +63,9 @@ const SalaryPage = ({
     <div className="flex flex-col w-full ml-[11.5rem]">
       <Header user={user} notif={notif} />
       <Nav user_type={user_type} />
-
       <div className="px-[5rem] py-4 w-full">
         {!selectedSalary ? (
-          <div className="px-10 py-6">
+          <>
             <div className="flex items-center space-x-4 mb-6">
               <select
                 className="border p-2 rounded"
@@ -101,70 +95,46 @@ const SalaryPage = ({
               </button>
             </div>
 
-            <div className="border rounded-lg shadow-md">
-              <table className="w-full border-collapse">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="border p-2 text-left">Salary Name</th>
-                    <th className="border p-2 text-left">Generate Date</th>
-                    <th className="border p-2 text-left">Status</th>
-                    <th className="border p-2 text-left">Approved By</th>
-                    <th className="border p-2 text-left">Total Amount</th>
-                    <th className="border p-2 text-left">Per Day Salary</th>
-                    <th className="border p-2 text-left">Hourly Salary</th>
+            <table className="w-full border-collapse">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="border p-2">Salary Name</th>
+                  <th className="border p-2">Generate Date</th>
+                  <th className="border p-2">Status</th>
+                  <th className="border p-2">Total Amount</th>
+                  <th className="border p-2">Per Day Salary</th>
+                  <th className="border p-2">Hourly Salary</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredSalaries.map((sal) => (
+                  <tr
+                    key={sal.id}
+                    onClick={() =>
+                      setSelectedSalary({
+                        ...sal,
+                        employeeName: nameMap[sal.employee_id],
+                        deductions: deductionsss,
+                      })
+                    }
+                  >
+                    <td className="border p-2">{sal.salary_name}</td>
+                    <td className="border p-2">{sal.generate_date}</td>
+                    <td className="border p-2">{sal.status}</td>
+                    <td className="border p-2">{sal.total_amount}</td>
+                    <td className="border p-2">{sal.perDaySalary}</td>
+                    <td className="border p-2">{sal.hourlySalary}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {filteredSalaries?.length > 0 ? (
-                    filteredSalaries.map((sal) => (
-                      <tr
-                        key={sal.id}
-                        className="hover:bg-gray-50 cursor-pointer"
-                        onClick={() =>
-                          setSelectedSalary({
-                            ...sal,
-                            employeeName: nameMap[sal.employee_id],
-                            deductions: deductions?.filter(
-                              (ded) => ded.salary_id === sal.id
-                            ) || [], // Ensure filter doesn't throw an error
-                          })
-                        }
-                      >
-                        <td className="border p-2">{sal.salary_name}</td>
-                        <td className="border p-2">{sal.generate_date}</td>
-                        <td
-                          className={`border p-2 ${
-                            sal.status === "Paid"
-                              ? "text-green-600"
-                              : "text-red-500"
-                          }`}
-                        >
-                          {sal.status}
-                        </td>
-                        <td className="border p-2">{sal.approved_by}</td>
-                        <td className="border p-2">
-                          {new Intl.NumberFormat().format(sal.total_amount)}
-                        </td>
-                        <td className="border p-2">{sal.perDaySalary}</td>
-                        <td className="border p-2">{sal.hourlySalary}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="border p-2 text-center text-gray-500"
-                      >
-                        No salaries found.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                ))}
+              </tbody>
+            </table>
+          </>
         ) : (
-          <SalarySlip data={selectedSalary} onClose={() => setSelectedSalary(null)} />
+          <SalarySlip
+            data={selectedSalary}
+            onClose={() => setSelectedSalary(null)}
+            deductionsss={deductionsss}
+          />
         )}
       </div>
     </div>

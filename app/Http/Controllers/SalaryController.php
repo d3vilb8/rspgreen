@@ -125,6 +125,7 @@ class SalaryController extends Controller
         // Render the data in the view
         return Inertia::render('salary/salaryAll', compact('salary', 'employees', 'deductionsss'));
     }
+   
     
     
     

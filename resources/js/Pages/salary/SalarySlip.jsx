@@ -60,7 +60,7 @@ console.log("jhg",deductionsss)
     const { value, checked } = event.target;
     setSelectedDeductions((prevSelected) =>
       checked
-        ? [...prevSelected, deductionss.find((ded) => ded.id === parseInt(value))]
+        ? [...prevSelected, deductionsss?.find((ded) => ded.id === parseInt(value))]
         : prevSelected.filter((ded) => ded.id !== parseInt(value))
     );
   };
@@ -134,7 +134,7 @@ console.log("jhg",deductionsss)
 
         {/* Display checkboxes for deductions */}
         <div className="mb-4">
-          {deductionss.map((ded) => (
+          {deductionsss?.map((ded) => (
             <div key={ded.id} className="flex items-center mb-2">
               <input
                 type="checkbox"
