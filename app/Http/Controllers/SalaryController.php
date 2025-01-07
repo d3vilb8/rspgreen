@@ -57,18 +57,21 @@ class SalaryController extends Controller
 
         return back();
     }
-    public function show() {
+    public function show()
+    {
         // Retrieve individual salary records
         $salary = Salary::select(
+            'id', // Add 'id' for updates
+            'employee_id', // Add 'employee_id' to link salaries with employees
             'salary_name',
             'generate_date',
             'generate_by',
             'status',
             'approved_date',
             'approved_by',
-            'total_amount'
-        )
-        ->get();  
+            'total_amount',
+            'allowance' // Include allowance in the select query
+        )->get();
     
         // Get employee data
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
@@ -79,7 +82,6 @@ class SalaryController extends Controller
         $attendanceRecords = Attendance::select('employee_id', 'date', 'in_time', 'out_time')
             ->whereMonth('date', '=', now()->month)
             ->get();
-            // dd( $attendanceRecords);
     
         // Calculate late days for each employee
         $lateCount = [];
@@ -94,20 +96,30 @@ class SalaryController extends Controller
             }
         }
     
-    
         foreach ($salary as $sal) {
+            $basicSalary = $sal->total_amount; // Assuming total_amount is the basic salary
+    
+            // Calculate DA (Dearness Allowance)
+            $allowance = $basicSalary * 0.20; // DA is 20% of basic salary
+            $sal->allowance = $allowance;
+    
+            // Deduction for late days
             $deduction = 0;
             if (isset($lateCount[$sal->employee_id]) && $lateCount[$sal->employee_id] >= 3) {
                 // Apply deduction (e.g., 1 day's salary deduction)
                 $daysInMonth = now()->daysInMonth;
-                $perDaySalary = $sal->total_amount / $daysInMonth;
+                $perDaySalary = $basicSalary / $daysInMonth;
                 $deduction = $perDaySalary;
             }
     
-            $sal->total_amount -= $deduction;
+            // Update the total salary amount after applying deductions
+            $sal->total_amount = $basicSalary - $deduction;
+    
+            // Save the updated salary with allowance and total amount
             $sal->save();
         }
     
+        // Render the data in the view
         return Inertia::render('salary/salaryAll', compact('salary', 'employees'));
     }
     

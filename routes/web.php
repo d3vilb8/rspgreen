@@ -28,10 +28,12 @@ use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EstimateController;
 use App\Http\Controllers\ComplaintController;
+use App\Http\Controllers\DeductionController;
 use App\Http\Controllers\LeadStageController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\TimesheetController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignatonController;
 use App\Http\Controllers\LeadSourceController;
@@ -47,7 +49,6 @@ use App\Http\Controllers\LeaveManagementController;
 use App\Http\Controllers\NotificationAllController;
 use App\Http\Controllers\ServiceCategoryController;
 use Flasher\Prime\Test\Constraint\NotificationCount;
-use App\Http\Controllers\CommissionController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -360,3 +361,9 @@ Route::resource('lead-sources', LeadSourceController::class);
 // Route::resource('lead-stages', LeadStageController::class);
 Route::get('lead/addStage', [LeadStageController::class, 'index'])->name('lead/addStage');
 Route::resource('lead-stages', LeadStageController::class);
+//
+// // Route::get('/deductions/{employeeId}', [DeductionController::class, 'index']);
+// Route::post('/deductions/{employeeId}', [DeductionController::class, 'index']);
+
+// // Route to add a new deduction
+Route::post('salary/deductions', [DeductionController::class, 'store']);

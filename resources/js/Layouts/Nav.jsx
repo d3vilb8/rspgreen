@@ -42,7 +42,15 @@ const Nav = ({ user_type, usrrr }) => {
             name: "Salary generator employee wise",
             link: "/all-salary",
             perm: "view_salary",
+
         },
+        {
+            name: "Salary deduction",
+            link: "salary/deductions",
+            perm: "view_employee"
+
+        },
+       
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];
 
