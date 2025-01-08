@@ -34,13 +34,13 @@ class EmployeeController extends Controller
     {
         $user = Auth::user()->name;
         // $employee = User::with('employees')->where('type', 2)->get();
-        $users = User::role('Employee')->with(['employees', 'roles'])->get(); 
+        $users = User::role('Employee')->with(['employees', 'roles'])->get();
         // dd($users);// Returns only users with the role 'writer'
         $employee = User::with(['employees', 'roles'])->where('type', 2)->get();
 
 
-      
-        
+
+
         $user = Auth::user()->name;
         // $user_type = Auth::user()->id;
         $userss = Auth::user();
@@ -64,10 +64,10 @@ class EmployeeController extends Controller
         }
         $roles = Role::all();
         $notif = Auth::user()->notifications;
-        $branches= Branch::all();
-        $department= Department::all();
-        $designation=Designation::all();
-        return Inertia::render('employee/create', compact('user', 'user_type', 'roles', 'notif','branches','department','designation'));
+        $branches = Branch::all();
+        $department = Department::all();
+        $designation = Designation::all();
+        return Inertia::render('employee/create', compact('user', 'user_type', 'roles', 'notif', 'branches', 'department', 'designation'));
     }
     protected function generateEmployeeId()
     {
@@ -132,8 +132,8 @@ class EmployeeController extends Controller
             'employee' => 'required',
             'phone' => 'required',
         ]);
-        
-        
+
+
         $cvPath = $request->file('cv')->store('uploads/cv', 'public');
         $chequePath = $request->file('can_cheque')->store('uploads/cheques', 'public');
         $declarationPath = $request->file('declaration')->store('uploads/declarations', 'public');
@@ -171,7 +171,7 @@ class EmployeeController extends Controller
         $employee->company_doj = $request['company_doj'];
 
 
-         $employee->documents =json_encode($request['documents']);;
+        $employee->documents = json_encode($request['documents']);;
         $employee->account_holder_name = $request['account_holder_name'];
         $employee->account_number = $request['account_number'];
         $employee->bank_name = $request['bank_name'];
@@ -191,7 +191,7 @@ class EmployeeController extends Controller
         $employee->cv = $cvPath;
         $employee->can_cheque = $chequePath;
         $employee->declaration = $declarationPath;
-        $employee->employee =$employeePath;
+        $employee->employee = $employeePath;
 
         $employee->save();
 
@@ -206,7 +206,7 @@ class EmployeeController extends Controller
         $sd = null;
         $ed = null;
         $query = Screenshot::query();
-    
+
         // Check if 'images' parameter exists for bulk deletion
         if ($request->filled('images')) {
             // Flatten the array to extract only the IDs
@@ -214,41 +214,41 @@ class EmployeeController extends Controller
             $imageIds = array_map(function ($image) {
                 return $image['id'];
             }, $imagesToDelete);
-    
+
             // Perform the bulk delete using the image IDs
             Screenshot::whereIn('id', $imageIds)->delete();
-    
+
             return response()->json(['message' => 'Images deleted successfully'], 200);
         }
-    
+
         if ($request->filled('downloaded')) {
             // Handle individual screenshot download and deletion
             $screenshot = Screenshot::where('id', $request->screenshot_id)->first();
-    
+
             if ($screenshot && !$screenshot->downloaded_at) {
                 $screenshot->downloaded_at = now(); // Set the downloaded timestamp
                 $screenshot->save();
-    
+
                 // Delete the screenshot after it's downloaded
                 $screenshot->delete();
             }
         }
-    
+
         // Apply other filters
         if ($request->filled('employee_id')) {
             $query->where('user_id', $request->employee_id);
         }
-    
+
         if ($request->filled('start_date')) {
             $query->whereDate('created_at', '>=', $request->start_date);
             $sd = $request->start_date;
         }
-    
+
         if ($request->filled('end_date')) {
             $query->whereDate('created_at', '<=', $request->end_date);
             $ed = $request->end_date;
         }
-    
+
         // Get the images
         $imgs = $query->get()->groupBy(function ($item) {
             return Carbon::parse($item->created_at)->format('Y-m-d');
@@ -268,162 +268,169 @@ class EmployeeController extends Controller
         });
 
         // dd($groupedImgsWithUniqueDownload);
-            
+
         $emp = User::where('id', '!=', '1')->get();
-    
-        return Inertia::render('employee/screenshot', compact('emp', 'imgs', 'empi', 'sd', 'ed','groupedImgsWithUniqueDownload'));
+
+        return Inertia::render('employee/screenshot', compact('emp', 'imgs', 'empi', 'sd', 'ed', 'groupedImgsWithUniqueDownload'));
     }
-    
+
     public function workhours(Request $request)
-{
-    $employeeId = $request->input('employee_id');
-    $startDate = $request->input('start_date');
-    $endDate = $request->input('end_date');
+    {
+        $employeeId = $request->input('employee_id');
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
 
-    $query = Entry::query();
+        $query = Entry::query();
 
-    if ($employeeId) {
-        $query->where('user_id', $employeeId);
-    }
+        if ($employeeId) {
+            $query->where('user_id', $employeeId);
+        }
 
-    if ($startDate) {
-        $query->whereDate('entry_at', '>=', $startDate);
-    }
+        if ($startDate) {
+            $query->whereDate('entry_at', '>=', $startDate);
+        }
 
-    if ($endDate) {
-        $query->whereDate('entry_at', '<=', $endDate);
-    }
+        if ($endDate) {
+            $query->whereDate('entry_at', '<=', $endDate);
+        }
 
-    // Group Entries
-    $entries = $query->get()->groupBy(function ($entry) {
-        return $entry->user_id . '_' . Carbon::parse($entry->entry_at)->toDateString();
-    });
+        // Group Entries
+        $entries = $query->get()->groupBy(function ($entry) {
+            return $entry->user_id . '_' . Carbon::parse($entry->entry_at)->toDateString();
+        });
 
-    $hoursByUserAndDate = $entries->map(function ($userEntries, $groupKey) {
-        $totalSeconds = 0;
-        $logs = [];
-        $sortedEntries = $userEntries->sortBy('entry_at')->values();
-        [$userId, $date] = explode('_', $groupKey);
+        $hoursByUserAndDate = $entries->map(function ($userEntries, $groupKey) {
+            $totalSeconds = 0;
+            $logs = [];
+            $sortedEntries = $userEntries->sortBy('entry_at')->values();
+            [$userId, $date] = explode('_', $groupKey);
 
-        for ($i = 0; $i < $sortedEntries->count(); $i++) {
-            $entry = $sortedEntries[$i];
+            for ($i = 0; $i < $sortedEntries->count(); $i++) {
+                $entry = $sortedEntries[$i];
 
-            $logs[] = [
-                'type' => $entry->type,
-                'address'=> \App\Models\Location::find($entry->location_id) ? \App\Models\Location::find($entry->location_id)->address : '',
-                'timestamp' => Carbon::parse($entry->entry_at)
+                $logs[] = [
+                    'type' => $entry->type,
+                    'address' => \App\Models\Location::find($entry->location_id) ? \App\Models\Location::find($entry->location_id)->address : '',
+                    'timestamp' => Carbon::parse($entry->entry_at)
+                ];
+
+                if (
+                    $entry->type === 'logout' &&
+                    $i > 0 &&
+                    $sortedEntries[$i - 1]->type === 'loggedin'
+                ) {
+                    $logoutTime = Carbon::parse($entry->entry_at);
+                    $loginTime = Carbon::parse($sortedEntries[$i - 1]->entry_at);
+
+                    if ($logoutTime->greaterThan($loginTime)) {
+                        $totalSeconds += $loginTime->diffInSeconds($logoutTime);
+                    } else {
+                        Log::warning("Invalid logout-login pair detected", [
+                            'user_id' => $entry->user_id,
+                            'login_time' => $loginTime,
+                            'logout_time' => $logoutTime,
+                        ]);
+                    }
+                }
+            }
+
+            $hours = intdiv($totalSeconds, 3600);
+            $minutes = intdiv($totalSeconds % 3600, 60);
+            $seconds = $totalSeconds % 60;
+
+            // Total seconds in a standard workday (e.g., 8 hours)
+            $expectedWorkSeconds = 28800; // 8 hours * 3600 seconds
+
+            // Remaining time
+            $remainingSeconds = max(0, $expectedWorkSeconds - $totalSeconds);
+            $remainingHours = intdiv($remainingSeconds, 3600);
+            $remainingMinutes = intdiv($remainingSeconds % 3600, 60);
+            $remainingSeconds = $remainingSeconds % 60;
+
+            return [
+                'name' => User::findOrFail($userId)->name,
+                'date' => $date,
+                'total_time' => sprintf('%02dh %02dm %02ds', $hours, $minutes, $seconds),
+                'remaining_time' => sprintf('%02dh %02dm %02ds', $remainingHours, $remainingMinutes, $remainingSeconds),
+                'logs' => $logs
             ];
+        });
 
-            if (
-                $entry->type === 'logout' &&
-                $i > 0 &&
-                $sortedEntries[$i - 1]->type === 'loggedin'
-            ) {
-                $logoutTime = Carbon::parse($entry->entry_at);
-                $loginTime = Carbon::parse($sortedEntries[$i - 1]->entry_at);
+        // Get the current page from the request
+        $page = request()->get('page', 1);
+        $perPage = 10;
 
-                if ($logoutTime->greaterThan($loginTime)) {
-                    $totalSeconds += $loginTime->diffInSeconds($logoutTime);
-                } else {
-                    Log::warning("Invalid logout-login pair detected", [
-                        'user_id' => $entry->user_id,
-                        'login_time' => $loginTime,
-                        'logout_time' => $logoutTime,
-                    ]);
-                }
-            }
-        }
+        // Paginate the results
+        $paginatedData = new LengthAwarePaginator(
+            $hoursByUserAndDate->forPage($page, $perPage),
+            $hoursByUserAndDate->count(),
+            $perPage,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
-        $hours = intdiv($totalSeconds, 3600);
-        $minutes = intdiv($totalSeconds % 3600, 60);
-        $seconds = $totalSeconds % 60;
-
-        // Total seconds in a standard workday (e.g., 8 hours)
-        $expectedWorkSeconds = 28800; // 8 hours * 3600 seconds
-
-        // Remaining time
-        $remainingSeconds = max(0, $expectedWorkSeconds - $totalSeconds);
-        $remainingHours = intdiv($remainingSeconds, 3600);
-        $remainingMinutes = intdiv($remainingSeconds % 3600, 60);
-        $remainingSeconds = $remainingSeconds % 60;
-
-        return [
-            'name' => User::findOrFail($userId)->name,
-            'date' => $date,
-            'total_time' => sprintf('%02dh %02dm %02ds', $hours, $minutes, $seconds),
-            'remaining_time' => sprintf('%02dh %02dm %02ds', $remainingHours, $remainingMinutes, $remainingSeconds),
-            'logs' => $logs
-        ];
-    });
-
-    // Get the current page from the request
-    $page = request()->get('page', 1);
-    $perPage = 10;
-
-    // Paginate the results
-    $paginatedData = new LengthAwarePaginator(
-        $hoursByUserAndDate->forPage($page, $perPage),
-        $hoursByUserAndDate->count(),
-        $perPage,
-        $page,
-        ['path' => request()->url(), 'query' => request()->query()]
-    );
-
-    $emp = User::where('id', '!=', '1')->get();
-    return Inertia::render('employee/workhours', ['emp' => $emp, 'hoursByUserAndDate' => $paginatedData, 'empi' => $employeeId ?? '', 'sd' => $startDate ?? '', 'ed' => $endDate ?? '']);
-}
-
-public function downloadImages(Request $request)
-{
-    $images = $request->input('images');
-
-    $zipFileName = 'screenshot.zip';
-    $zipFilePath = 'public/' . $zipFileName;
-
-    // Create a new ZIP archive
-    $zip = new ZipArchive;
-    $localZipPath = Storage::path($zipFilePath);
-
-    if ($zip->open($localZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-        foreach ($images as $image) {
-            if (isset($image['path'])) {
-                $filePath = 'public/' . $image['path'];
-
-                if (Storage::exists($filePath)) {
-                    $fileContent = Storage::get($filePath);
-                    $zip->addFromString(basename($filePath), $fileContent);
-                }
-            }
-        }
-        $zip->close();
-
-        // Update the 'is_download' column in the screenshots table
-        $imageIds = collect($images)->pluck('id');
-        DB::table('screenshots')
-            ->whereIn('id', $imageIds)
-            ->update(['is_download' => 1]);
-    } else {
-        return response()->json(['error' => 'Unable to create ZIP file'], 500);
+        $emp = User::where('id', '!=', '1')->get();
+        return Inertia::render('employee/workhours', ['emp' => $emp, 'hoursByUserAndDate' => $paginatedData, 'empi' => $employeeId ?? '', 'sd' => $startDate ?? '', 'ed' => $endDate ?? '']);
     }
 
-    return redirect()->route('download.file', $zipFileName);
-}
+    public function downloadImages(Request $request)
+    {
+        $images = $request->input('images');
 
-    
+        $zipFileName = 'screenshot.zip';
+        $zipFilePath = 'public/' . $zipFileName;
 
-    public function downloadFile($fileName){
+        // Create a new ZIP archive
+        $zip = new ZipArchive;
+        $localZipPath = Storage::path($zipFilePath);
+
+        if ($zip->open($localZipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+            foreach ($images as $image) {
+                if (isset($image['path'])) {
+                    $filePath = 'public/' . $image['path'];
+
+                    if (Storage::exists($filePath)) {
+                        $fileContent = Storage::get($filePath);
+                        $zip->addFromString(basename($filePath), $fileContent);
+                    }
+                }
+            }
+            $zip->close();
+
+            // Update the 'is_download' column in the screenshots table
+            $imageIds = collect($images)->pluck('id');
+            DB::table('screenshots')
+                ->whereIn('id', $imageIds)
+                ->update(['is_download' => 1]);
+        } else {
+            return response()->json(['error' => 'Unable to create ZIP file'], 500);
+        }
+
+        return redirect()->route('download.file', $zipFileName);
+    }
+
+
+
+    public function downloadFile($fileName)
+    {
         return Storage::disk('public')->download($fileName);
     }
 
 
-    public function show($id){
-        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments','employees.department_id','=','departments.id')
-            ->join('designations','employees.designation_id','=','designations.id')
-            ->join('branches','branches.id','=','employees.branch_id')
-            ->select('employees.phone', 'employees.address', 'employees.joinning_date',
+    public function show($id)
+    {
+        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->join('branches', 'branches.id', '=', 'employees.branch_id')
+            ->select(
+                'employees.phone',
+                'employees.address',
+                'employees.joinning_date',
                 'employees.dob',
-                'users.name', 'users.email', 
-                'users.id', 'users.password',
+                'users.name',
+                'users.email',
+                'users.id',
+                'users.password',
                 'departments.name as d_name',
                 'designations.name as desig_name',
                 'employees.account_number',
@@ -450,26 +457,32 @@ public function downloadImages(Request $request)
                 'employees.esi_no',
                 'employees.pan_no',
                 'employees.aadhar_no',
-                 'employees.cv',
+                'employees.cv',
                 'employees.declaration',
                 'employees.can_cheque',
                 'employees.employee',
-                'branches.name as b_name')->where('users.id', $id)->first();
+                'branches.name as b_name'
+            )->where('users.id', $id)->first();
 
 
-                return Inertia::render('employee/show',compact('employee'));
+        return Inertia::render('employee/show', compact('employee'));
     }
 
 
     public function edit($id)
     {
-        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments','employees.department_id','=','departments.id')
-            ->join('designations','employees.designation_id','=','designations.id')
-            ->join('branches','branches.id','=','employees.branch_id')
-            ->select('employees.phone', 'employees.address', 'employees.joinning_date',
+        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->join('branches', 'branches.id', '=', 'employees.branch_id')
+            ->select(
+                'employees.phone',
+                'employees.address',
+                'employees.joinning_date',
                 'employees.dob',
-                'users.name', 'users.email', 
-                'users.id', 'users.password',
+                'users.name',
+                'users.email',
+                'users.id',
+                'users.password',
                 'departments.name as d_name',
                 'designations.name as desig_name',
                 'employees.account_number',
@@ -500,15 +513,16 @@ public function downloadImages(Request $request)
                 'employees.declaration',
                 'employees.can_cheque',
                 // 'employees.account_holder_name  ',
-                
-                'branches.name as b_name')->where('users.id', $id)->first();
+
+                'branches.name as b_name'
+            )->where('users.id', $id)->first();
 
         // dd($employee);
         $userss = Auth::user();
         $user = Auth::user()->name;
-        $branches= Branch::all();
-        $department= Department::all();
-        $designation=Designation::all();
+        $branches = Branch::all();
+        $department = Department::all();
+        $designation = Designation::all();
         if ($userss) {
             // Ensure permissions are assigned and fetched correctly
             $user_type = $userss->getAllPermissions()->pluck('name')->toArray();
@@ -518,50 +532,56 @@ public function downloadImages(Request $request)
         // $employeeRole = $employee->roles()->pluck('name')->first();
         $employeeRole = $employee->getRoleNames()->first();
         $notif = Auth::user()->notifications;
-        return Inertia::render('employee/edit', compact('employee', 'user_type', 'roles', 'employeeRole', 'user', 'notif','branches','department','designation'));
+        return Inertia::render('employee/edit', compact('employee', 'user_type', 'roles', 'employeeRole', 'user', 'notif', 'branches', 'department', 'designation'));
     }
     public function update(Request $request, $id)
     {
-        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments','employees.department_id','=','departments.id')
-        ->join('designations','employees.designation_id','=','designations.id')
-        ->join('branches','branches.id','=','employees.branch_id')
-        ->select('employees.phone', 'employees.address', 'employees.joinning_date',
-            'employees.dob',
-            'users.name', 'users.email', 
-            'users.id', 'users.password',
-            'departments.name as d_name',
-            'designations.name as desig_name',
-            'employees.account_number',
-            'employees.bank_name',
-            'employees.bank_identifier_code',
-            'employees.branch_location',
-            'employees.salary_type',
-            'employees.salary',
-            'employees.is_active',
-            'employees.created_by',
-            'employees.branch_id',
-            'employees.department_id',
-            'employees.designation_id',
-            'employees.company_doj',
-            'employees.documents',
-            'employees.dob',
-            'employees.gender',
-            'employees.basic_salary',
-            'employees.net_salary',
-            'employees.apc_no',
-            'employees.ifsc_code',
-            'employees.ptax_no',
-            'employees.pf_no',
-            'employees.esi_no',
-            'employees.pan_no',
-            'employees.aadhar_no',
-            'employees.cv',
-            'employees.declaration',
-            'employees.can_cheque',
-            // 'employees.account_holder_name  ',
-            
-            'branches.name as b_name')->where('users.id', $id)->first();
-            // dd($employee);
+        $employee = User::join('employees', 'employees.user_id', '=', 'users.id')->join('departments', 'employees.department_id', '=', 'departments.id')
+            ->join('designations', 'employees.designation_id', '=', 'designations.id')
+            ->join('branches', 'branches.id', '=', 'employees.branch_id')
+            ->select(
+                'employees.phone',
+                'employees.address',
+                'employees.joinning_date',
+                'employees.dob',
+                'users.name',
+                'users.email',
+                'users.id',
+                'users.password',
+                'departments.name as d_name',
+                'designations.name as desig_name',
+                'employees.account_number',
+                'employees.bank_name',
+                'employees.bank_identifier_code',
+                'employees.branch_location',
+                'employees.salary_type',
+                'employees.salary',
+                'employees.is_active',
+                'employees.created_by',
+                'employees.branch_id',
+                'employees.department_id',
+                'employees.designation_id',
+                'employees.company_doj',
+                'employees.documents',
+                'employees.dob',
+                'employees.gender',
+                'employees.basic_salary',
+                'employees.net_salary',
+                'employees.apc_no',
+                'employees.ifsc_code',
+                'employees.ptax_no',
+                'employees.pf_no',
+                'employees.esi_no',
+                'employees.pan_no',
+                'employees.aadhar_no',
+                'employees.cv',
+                'employees.declaration',
+                'employees.can_cheque',
+                // 'employees.account_holder_name  ',
+
+                'branches.name as b_name'
+            )->where('users.id', $id)->first();
+        // dd($employee);
         // Validate the incoming request
         $validatedData = $request->validate([
             'email' => 'required|email|unique:users,email,' . $id,
@@ -571,23 +591,23 @@ public function downloadImages(Request $request)
             'documents.*.type' => 'required|in:image,document', // Validate each document's type
             'documents.*.file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048', // Validate uploaded files
         ]);
-        $cvPath = $request->hasFile('cv') 
-    ? $request->file('cv')->store('uploads/cv', 'public') 
-    : $employee->cv; // Retain existing path if no file uploaded
+        $cvPath = $request->hasFile('cv')
+            ? $request->file('cv')->store('uploads/cv', 'public')
+            : $employee->cv; // Retain existing path if no file uploaded
 
-$chequePath = $request->hasFile('can_cheque') 
-    ? $request->file('can_cheque')->store('uploads/cheques', 'public') 
-    : $employee->can_cheque;
+        $chequePath = $request->hasFile('can_cheque')
+            ? $request->file('can_cheque')->store('uploads/cheques', 'public')
+            : $employee->can_cheque;
 
-$declarationPath = $request->hasFile('declaration') 
-    ? $request->file('declaration')->store('uploads/declarations', 'public') 
-    : $employee->declaration;
+        $declarationPath = $request->hasFile('declaration')
+            ? $request->file('declaration')->store('uploads/declarations', 'public')
+            : $employee->declaration;
 
 
-    $employeePath = $request->hasFile('employee') 
-    ? $request->file('employee')->store('uploads/employee', 'public') 
-    : $employee->employee;
-    
+        $employeePath = $request->hasFile('employee')
+            ? $request->file('employee')->store('uploads/employee', 'public')
+            : $employee->employee;
+
         // Update user
         $user = User::findOrFail($id);
         $user->name = $request->input('name');
@@ -595,7 +615,7 @@ $declarationPath = $request->hasFile('declaration')
         $user->password = $request->input('password') ? bcrypt($request->input('password')) : $user->password;
         $user->save();
         $user->syncRoles($request->input('roleemployee'));
-    
+
         // Update employee details
         $employee = Employee::where('user_id', $id)->first();
         $employee->dob = $request->input('dob');
@@ -617,16 +637,16 @@ $declarationPath = $request->hasFile('declaration')
         $employee->cv = $cvPath;
         $employee->can_cheque = $chequePath;
         $employee->declaration = $declarationPath;
-        $employeePath->employee =$employeePath;
+        $employee->employee = $employeePath;
         $employee->joinning_date = $validatedData['joinning_date'];
-    
+
         // Handle document uploads
         $documents = [];
         if ($request->has('documents')) {
             foreach ($request->file('documents', []) as $index => $file) {
                 $name = $request->input("documents.$index.name", '');
                 $type = $request->input("documents.$index.type", '');
-    
+
                 if ($file && $file->isValid()) {
                     // Store file
                     $filePath = $file->store('documents', 'public');
@@ -648,13 +668,13 @@ $declarationPath = $request->hasFile('declaration')
                 }
             }
         }
-    
+
         $employee->documents = json_encode($documents); // Encode the documents array as JSON
         $employee->save();
-    
+
         return redirect()->route('employees')->with('success', 'Employee updated successfully.');
     }
-    
+
 
 
     public function destroy($id)

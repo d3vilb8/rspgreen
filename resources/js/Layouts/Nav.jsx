@@ -38,19 +38,19 @@ const Nav = ({ user_type, usrrr }) => {
         // { name: "attendance", link: "/attendance", perm: "view_attendance" },
         { name: "Salary generate", link: "/salaries", perm: "view_salary" },
         { name: "Attendance", link: "/attendance", perm: "view_salary" },
+        { name: "Generate Titles", link: "/titles", perm: "view_salary" },
+
         {
             name: "Salary generator employee wise",
             link: "/all-salary",
             perm: "view_salary",
-
         },
         {
             name: "Salary deduction",
             link: "/deductions",
-            perm: "view_employee"
-
+            perm: "view_employee",
         },
-       
+
         // { name: "payroll", link: "/payroll", perm: "view_payroll" },
     ];
 
@@ -103,7 +103,24 @@ const Nav = ({ user_type, usrrr }) => {
                             items={menuitems}
                         />
                     )}
-
+                    {props.auth.user.roles[0]?.name === "Employee" && (
+                        <li
+                            className={
+                                url === "/Quotation"
+                                    ? "active bg-[#0A1B3F] p-2 px-5 text-[0.9rem] text-white"
+                                    : "p-2 text-black text-[0.9rem]"
+                            }
+                        >
+                            <Link href="/leave-index" className="flex space-x-2">
+                                {" "}
+                                <span>
+                                    {" "}
+                                    <FaHandPaper />
+                                </span>{" "}
+                                <span>Leave management</span>{" "}
+                            </Link>
+                        </li>
+                    )}
                     {/* <li
                         className={
                             url === "/complaint"

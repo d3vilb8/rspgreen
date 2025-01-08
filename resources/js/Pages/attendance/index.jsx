@@ -187,9 +187,9 @@ const Attendance = ({
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Employee Name
                                 </th>
-                                <th className="py-2 bg-slate-600 text-white text-left pl-2">
+                                {/* <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Employee Id
-                                </th>
+                                </th> */}
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Attandance Date
                                 </th>
@@ -215,9 +215,9 @@ const Attendance = ({
                                             <td className="py-2 pl-2 text-sm">
                                                 {a.name}
                                             </td>
-                                            <td className="py-2 pl-2 text-sm">
-                                                11101010101{a.id}
-                                            </td>
+                                            {/* <td className="py-2 pl-2 text-sm">
+                                                {a.id}
+                                            </td> */}
                                             <td className="py-2 pl-2 text-sm">
                                                 {new Date(
                                                     a.date
