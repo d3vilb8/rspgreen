@@ -30,13 +30,8 @@ const SalarySlip = ({ data, onClose, signatureName,deductionsss }) => {
   const [showModal, setShowModal] = useState(false);
 console.log("jhg",deductionsss)
   // Static deductions data
-  const deductionss = [
-    { id: 1, title: "Provident Fund", amount: 2000 },
-    { id: 2, title: "Professional Tax", amount: 500 },
-    { id: 3, title: "Health Insurance", amount: 1500 },
-  ];
+ 
 
-  // Basic Salary and other calculations
   const basicSalary = parseFloat(data.total_amount) || 0;
   const da = basicSalary * 0.2;
   const totalEarnings = basicSalary + da;
