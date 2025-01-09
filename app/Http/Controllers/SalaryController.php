@@ -72,11 +72,11 @@ class SalaryController extends Controller
             'total_amount',
             'allowance'
         )->get();
-
+    
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id', 'employees.basic_salary')
             ->get();
-
+    
         $combinedData = DB::table('branches')
             ->join('holidays', 'branches.id', '=', 'holidays.id')
             ->join('employees', 'employees.branch_id', '=', 'branches.id')
@@ -96,68 +96,81 @@ class SalaryController extends Controller
                 'leave_management.edate as leave_end_date'
             )
             ->get();
-
+    
         $combinedData = $combinedData->map(function ($item) {
             $leaveStart = Carbon::parse($item->leave_start_date);
             $leaveEnd = Carbon::parse($item->leave_end_date);
             $holidayStart = Carbon::parse($item->holiday_start_date);
             $holidayEnd = Carbon::parse($item->holiday_end_date);
-
+    
+            // Calculate total holiday days
             $item->total_holiday_days = $holidayStart->diffInDays($holidayEnd) + 1;
-
+    
+            // Check for overlap with holiday
             $overlapStart = $leaveStart->max($holidayStart);
             $overlapEnd = $leaveEnd->min($holidayEnd);
             $item->overlapping_days = $overlapStart <= $overlapEnd 
                 ? $overlapStart->diffInDays($overlapEnd) + 1 
                 : 0;
-
+    
+            // Total leave days
             $totalLeaveDays = $leaveStart->diffInDays($leaveEnd) + 1;
             $weekendDays = $leaveStart->diffInDaysFiltered(fn($date) => $date->isWeekend(), $leaveEnd);
-
+    
+            // Adjust for weekend days
             $adjustedLeaveDays = $totalLeaveDays - $weekendDays;
-
-            $salaryDeductionDays = $adjustedLeaveDays >= 3 ? $adjustedLeaveDays : 0;
+    
+            // Apply salary deduction only if adjusted leave days are greater than 3
+            $salaryDeductionDays = $adjustedLeaveDays > 3 ? $adjustedLeaveDays : 0;
             $perDaySalary = $item->basic_salary / 30;
             $salaryDeductionAmount = $perDaySalary * $salaryDeductionDays;
-
+    
             $item->adjusted_leave_days = $adjustedLeaveDays;
             $item->salary_deduction_days = $salaryDeductionDays;
             $item->per_day_salary = round($perDaySalary, 2);
             $item->salary_deduction_amount = round($salaryDeductionAmount, 2);
-
+    
             return $item;
-
         });
-        // dd($combinedData);
-
+    
+        // Get attendance records for the month
         $attendanceRecords = Attendance::select('employee_id', 'date', 'in_time', 'out_time')
             ->whereMonth('date', '=', now()->month)
             ->get();
-
+    
+        // Get all deductions
         $deductions = Deduction::all();
-
+    
+        // Loop through each salary record
         foreach ($salary as $sal) {
             $basicSalary = $sal->total_amount;
-
+    
+            // Calculate allowance (20% of basic salary)
             $allowance = $basicSalary * 0.20;
             $sal->allowance = $allowance;
-
+    
             $deduction = 0;
-
+    
+            // Check if the employee has 3 or more late attendances
             if (isset($lateCount[$sal->employee_id]) && $lateCount[$sal->employee_id] >= 3) {
                 $perDaySalary = $basicSalary / now()->daysInMonth;
                 $deduction = $perDaySalary;
             }
-
+    
+            // Update the total salary after deductions
             $updatedSalary = $basicSalary - $deduction;
-
+    
+            // Update salary in the database
             $sal->total_amount = $updatedSalary;
             $sal->save();
-
+    
             // Update basic salary in the employees table
             Employee::where('id', $sal->employee_id)->update(['basic_salary' => $updatedSalary]);
         }
-
+    
+        // Return the view with the combined data
         return Inertia::render('salary/salaryAll', compact('salary', 'employees', 'deductions', 'combinedData'));
     }
+    
+    
 }
