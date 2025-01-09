@@ -35,12 +35,12 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
     return (
         <div className="max-w-4xl mx-auto p-6 rounded-lg shadow-md bg-white">
             {/* Print Button */}
-            <button
+            {/* <button
                 onClick={handlePrint}
                 className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
             >
                 Print Salary Slip
-            </button>
+            </button> */}
 
             {Array.isArray(combinedData) && combinedData.length > 0 ? (
                 combinedData.map((employee) => {
@@ -58,6 +58,9 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                     // Find matching additional data from the array
                     const matchedData = data.find((item) => item.id === employee_id);
 
+                    // Calculate total salary (basic + allowance)
+                    let totalSalary = total_amount + allowance;
+
                     // Calculate total deductions
                     const totalDeduction = selectedDeductions.reduce(
                         (acc, item) => acc + (parseFloat(item.amount) || 0),
@@ -70,12 +73,8 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                         updatedTotalDeduction += parseFloat(matchedData.salary_deduction_amount);
                     }
 
-                    let netSalary = total_amount - updatedTotalDeduction;
-
-                    // Additional deduction from matched data to netSalary
-                    if (matchedData && matchedData.salary_deduction_amount) {
-                        netSalary -= parseFloat(matchedData.salary_deduction_amount);
-                    }
+                    // Calculate net salary
+                    let netSalary = totalSalary - updatedTotalDeduction;
 
                     return (
                         <div
@@ -120,12 +119,6 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                                             <td>Education or Training</td>
                                             <td>Fixed</td>
                                             <td>{formatToCurrency(allowance)}</td>
-                                        </tr>
-                                        <tr>
-                                            <td className="py-2">Commission</td>
-                                            <td>Base Salary Plus Commission</td>
-                                            <td>Fixed</td>
-                                            <td>{formatToCurrency(perDaySalary)}</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -187,12 +180,6 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                                                 <td className="py-2">Salary Deduction Days</td>
                                                 <td>{matchedData.salary_deduction_days}</td>
                                             </tr>
-                                            
-                                            
-                                            {/* <tr>
-                                                <td className="py-2">Total Holiday Days</td>
-                                                <td>{matchedData.total_holiday_days}</td>
-                                            </tr> */}
                                         </tbody>
                                     </table>
                                 </div>
@@ -202,7 +189,7 @@ const SalarySlip = ({ combinedData, deductions, data }) => {
                             <div className="p-4 border-t">
                                 <div className="flex justify-between">
                                     <p className="font-semibold">Total Earning:</p>
-                                    <p>{formatToCurrency(total_amount)}</p>
+                                    <p>{formatToCurrency(totalSalary)}</p>
                                 </div>
                                 <div className="flex justify-between">
                                     <p className="font-semibold">Total Deduction:</p>

@@ -120,13 +120,18 @@ class SalaryController extends Controller
             // Adjust for weekend days
             $adjustedLeaveDays = $totalLeaveDays - $weekendDays;
     
-            // Apply salary deduction only if adjusted leave days are greater than 3
-            $salaryDeductionDays = $adjustedLeaveDays > 3 ? $adjustedLeaveDays : 0;
-            $perDaySalary = $item->basic_salary / 30;
-            $salaryDeductionAmount = $perDaySalary * $salaryDeductionDays;
+            // Deduct days if leave days exceed 3
+            $deductedLeaveDays = max(0, $adjustedLeaveDays - 3);  // Deduct for days exceeding 3
+            // Apply cap to the deduction, no more than 7 days
+            $deductedLeaveDays = min($deductedLeaveDays, 7);
     
+            // Calculate the deduction amount based on per day salary
+            $perDaySalary = $item->basic_salary / 30;  // Assuming 30 days in a month
+            $salaryDeductionAmount = $perDaySalary * $deductedLeaveDays;
+    
+            // Store calculated data
             $item->adjusted_leave_days = $adjustedLeaveDays;
-            $item->salary_deduction_days = $salaryDeductionDays;
+            $item->salary_deduction_days = $deductedLeaveDays;
             $item->per_day_salary = round($perDaySalary, 2);
             $item->salary_deduction_amount = round($salaryDeductionAmount, 2);
     
@@ -141,7 +146,7 @@ class SalaryController extends Controller
         // Get all deductions
         $deductions = Deduction::all();
     
-        // Loop through each salary record
+        // Loop through each salary record and update salary after deductions
         foreach ($salary as $sal) {
             $basicSalary = $sal->total_amount;
     
@@ -171,6 +176,7 @@ class SalaryController extends Controller
         // Return the view with the combined data
         return Inertia::render('salary/salaryAll', compact('salary', 'employees', 'deductions', 'combinedData'));
     }
+    
     
     
 }
