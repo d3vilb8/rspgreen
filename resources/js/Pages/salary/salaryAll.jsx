@@ -10,12 +10,13 @@ const SalaryPage = ({
     employees,
     salary,
     deductionsss, // Passed from backend
+    combinedData
 }) => {
     const [selectedEmployee, setSelectedEmployee] = useState("All Employees");
     const [selectedMonth, setSelectedMonth] = useState("2025-01");
     const [filteredSalaries, setFilteredSalaries] = useState([]);
     const [selectedSalary, setSelectedSalary] = useState(null);
-    console.log("hhhh", filteredSalaries);
+    console.log("hhhh", combinedData);
     const nameMap = employees.reduce((acc, emp) => {
         acc[emp.id] = emp.name;
         return acc;
@@ -161,6 +162,7 @@ const SalaryPage = ({
                         data={selectedSalary}
                         onClose={() => setSelectedSalary(null)}
                         deductionsss={deductionsss}
+                        combinedData={combinedData}
                     />
                 )}
             </div>

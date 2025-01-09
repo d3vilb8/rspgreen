@@ -13,26 +13,24 @@ const TableComponent = ({
     user_type,
     branchesa,
     searchEmpCount,
-    employees
+    employees,
+    holiday
 }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
     const [selectedBranchId, setSelectedBranchId] = useState(null);
     const [employeess,setEmployees] =useState(null);
     const [branches, setBranches] = useState([]);
-    const options = [
-        { value: 1, label: "pinaki roy" },
-        { value: 2, label: "Ella Schultz" },
-        { value: 3, label: "ami" },
-       
-    ];
-    console.log("kjhgf",user_type)
+    const locations = ["Location1", "Location2", "Location3"]; // Example array of locations
+    console.log("kjhgf",holiday)
     
     const notyf = new Notyf();
 
     const { data, setData, post, reset, errors } = useForm({
         b_name: "",
         transfer_to: "",
+        location_name:"",
+        location_id:''
     });
 
     useEffect(() => {
@@ -277,6 +275,22 @@ const TableComponent = ({
                                 required
                             />
                         </label>
+                        <label className="block mb-2">
+    Location:
+    <select
+        value={data.location_id}
+        onChange={(e) => setData("location_id", e.target.value)}
+        className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+    >
+        <option value="">Select a location</option>
+        {holiday.map((item, index) => (
+            <option key={item.id || index} value={item.id}>
+                {item.name}
+            </option>
+        ))}
+    </select>
+</label>
+
                         <button
                             type="submit"
                             className="p-2 mt-4 text-white bg-blue-600 rounded-md"
