@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Inertia\Inertia;
 use App\Models\Branch;
+use App\Models\Holiday;
 use App\Models\Employee;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Foundation\Auth\User;
 
 class EmpolyeeSetupController extends Controller
@@ -16,7 +18,8 @@ class EmpolyeeSetupController extends Controller
         $employees = User::join('employees', 'employees.user_id', '=', 'users.id')
             ->select('users.name', 'users.id')
             ->get();
-
+            $holiday = DB::table('locations_holiday')->get(); 
+    //    dd($holiday);
         $branches = Branch::all()->map(function ($branch) {
             $branch->empCount = Employee::where('branch_id', $branch->id)->count();
             return $branch;
@@ -25,17 +28,31 @@ class EmpolyeeSetupController extends Controller
         return Inertia::render('employee/employeesetup', [
             'branchesa' => $branches,
             'employees' => $employees,
+            'holiday' =>$holiday
         ]);
     }
 
     // Create a new branch
     public function store(Request $request)
-    {
-        $request->validate(['b_name' => 'required|string|max:255']);
-        Branch::create(['name' => $request->b_name]);
 
+    {
+        // dd($request->all());
+  
+        $request->validate([
+            'b_name' => 'required|string|max:255', 
+            'location_id' => 'required', 
+        ]);
+    
+      
+        Branch::create([
+            'name' => $request->b_name,     
+            'location_id' => $request->location_id,  
+        ]);
+    
+        // Redirect back with a success message
         return back()->with('success', 'Branch created successfully!');
     }
+    
 
     // Update branch details
     public function update(Request $request, $id)

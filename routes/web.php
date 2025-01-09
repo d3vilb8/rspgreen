@@ -10,6 +10,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\TestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\TitleController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\IncomeController;
 use App\Http\Controllers\ReportController;
@@ -366,3 +367,4 @@ Route::get('/deductions', [DeductionController::class, 'index'])->name('deductio
 Route::post('/deductions', [DeductionController::class, 'store'])->name('deductions.store');
 Route::put('/deductions/{id}', [DeductionController::class, 'update'])->name('deductions.update');
 Route::delete('/deductions/{id}', [DeductionController::class, 'destroy'])->name('deductions.destroy');
+Route::resource('titles', TitleController::class);
