@@ -105,8 +105,8 @@ const SalaryPage = ({
                                     <th className="border p-2">Generate Date</th>
                                     <th className="border p-2">Status</th>
                                     <th className="border p-2">Total Amount</th>
-                                    <th className="border p-2">Per Day Salary</th>
-                                    <th className="border p-2">Hourly Salary</th>
+                                    {/* <th className="border p-2">Per Day Salary</th>
+                                    <th className="border p-2">Hourly Salary</th> */}
                                     <th className="border p-2">Action</th>
                                 </tr>
                             </thead>
@@ -117,8 +117,8 @@ const SalaryPage = ({
                                         <td className="border p-2">{sal.generate_date}</td>
                                         <td className="border p-2">{sal.status}</td>
                                         <td className="border p-2">{sal.total_amount}</td>
-                                        <td className="border p-2">{sal.perDaySalary}</td>
-                                        <td className="border p-2">{sal.hourlySalary}</td>
+                                        {/* <td className="border p-2">{sal.perDaySalary}</td>
+                                        <td className="border p-2">{sal.hourlySalary}</td> */}
                                         <td className="border p-2">
                                             {/* Action button to open the details of the selected employee */}
                                             <button
