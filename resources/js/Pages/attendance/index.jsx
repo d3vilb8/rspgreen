@@ -8,7 +8,9 @@ import { FaPencil, FaXmark } from "react-icons/fa6";
 import { Notyf } from "notyf";
 import "notyf/notyf.min.css"; // Import Notyf styles
 import axios from "axios";
+
 const notyf = new Notyf();
+
 const Attendance = ({
     user,
     notif,
@@ -20,17 +22,14 @@ const Attendance = ({
     const [modal, setModal] = useState(false);
     const [edit, setEdit] = useState(false);
     const [editId, setEditId] = useState();
-    const [hours, sethours] = useState();
-    const [minutes, setminutes] = useState();
-
-    // const [hours, sethours] = useState();
     const { post, put, data, setData, processing, errors } = useForm({
         employee_id: "",
         date: "",
         in_time: "",
         out_time: "",
+        total_time:""
     });
-    console.log("jhgfgh");
+
     async function editAttd(id) {
         setEditId(id);
         await axios.get(`/attendances/${id}`).then((res) => {
@@ -59,29 +58,46 @@ const Attendance = ({
         e.preventDefault();
         post(route("attendances.store"), {
             onSuccess() {
-                notyf.success("Attandance Added");
+                notyf.success("Attendance Added");
             },
         });
     }
 
     function handleUpdate(e) {
-        console.log(editId);
         e.preventDefault();
         put(`/attendances/${editId}`, {
             onSuccess() {
-                notyf.success("Attandance updated");
+                notyf.success("Attendance updated");
             },
         });
     }
+
     async function handleDelete(id) {
         try {
             await axios.delete(`/attendances/${id}`);
             notyf.success("Attendance deleted successfully.");
-            // Refresh the attendance list after deletion
         } catch (error) {
-            // notyf.error("Failed to delete attendance.");
             console.error(error);
         }
+    }
+
+    // Calculate the office time (difference between in_time and out_time)
+    function calculateOfficeTime(inTime, outTime) {
+        const [inHours, inMinutes] = inTime.split(":").map(Number);
+        const [outHours, outMinutes] = outTime.split(":").map(Number);
+
+        const inDate = new Date();
+        inDate.setHours(inHours, inMinutes);
+
+        const outDate = new Date();
+        outDate.setHours(outHours, outMinutes);
+
+        const difference = (outDate - inDate) / 1000 / 60; // Difference in minutes
+
+        const hours = Math.floor(difference / 60);
+        const minutes = difference % 60;
+
+        return `${hours}h ${minutes}m`;
     }
 
     return (
@@ -91,7 +107,7 @@ const Attendance = ({
             <Modal show={modal} maxWidth="lg">
                 <div className="p-4">
                     <div className="flex justify-between items-center">
-                        <h1 className="text-lg">Create Attendace</h1>
+                        <h1 className="text-lg">Create Attendance</h1>
                         <button onClick={() => setModal(false)}>
                             <FaXmark />
                         </button>
@@ -109,9 +125,7 @@ const Attendance = ({
                                     value={data.employee_id}
                                     className="form-select rounded text-sm"
                                 >
-                                    <option value="">
-                                        -- Select Employee --
-                                    </option>
+                                    <option value="">-- Select Employee --</option>
                                     {employees.map((emp, index) => (
                                         <option key={index} value={emp.id}>
                                             {emp.name}
@@ -120,7 +134,7 @@ const Attendance = ({
                                 </select>
                             </div>
                             <div className="flex flex-col text-sm gap-y-2">
-                                <label htmlFor="">Attandance Date</label>
+                                <label htmlFor="">Attendance Date</label>
                                 <input
                                     type="date"
                                     name="date"
@@ -169,9 +183,13 @@ const Attendance = ({
             </Modal>
             <div className="w-full px-9">
                 <div className="flex justify-between items-center">
-                    <h1 className="text-xl px-9 ">Manage Attendance</h1>
+                    <h1 className="text-xl px-9">Manage Attendance</h1>
+                    {/* Office hours display */}
+                    <div className="text-sm px-4 py-2 rounded bg-gray-200">
+                        <strong>Office Hours: 10:00 AM - 7:00 PM</strong>
+                    </div>
                     <button
-                        onClick={(e) => setModal(true)}
+                        onClick={() => setModal(true)}
                         className="text-sm px-4 py-2 rounded text-white bg-blue-500"
                     >
                         Create Attendance
@@ -187,17 +205,17 @@ const Attendance = ({
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Employee Name
                                 </th>
-                                {/* <th className="py-2 bg-slate-600 text-white text-left pl-2">
-                                    Employee Id
-                                </th> */}
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
-                                    Attandance Date
+                                    Attendance Date
                                 </th>
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Clock In
                                 </th>
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2">
                                     Clock Out
+                                </th>
+                                <th className="py-2 bg-slate-600 text-white text-left pl-2">
+                                    Working Hours
                                 </th>
                                 <th className="py-2 bg-slate-600 text-white text-left pl-2 rounded-r">
                                     Action
@@ -215,9 +233,6 @@ const Attendance = ({
                                             <td className="py-2 pl-2 text-sm">
                                                 {a.name}
                                             </td>
-                                            {/* <td className="py-2 pl-2 text-sm">
-                                                {a.id}
-                                            </td> */}
                                             <td className="py-2 pl-2 text-sm">
                                                 {new Date(
                                                     a.date
@@ -230,9 +245,15 @@ const Attendance = ({
                                                 {formatTime(a.out_time)}
                                             </td>
                                             <td className="py-2 pl-2 text-sm">
+                                                {calculateOfficeTime(
+                                                    a.in_time,
+                                                    a.out_time
+                                                )}
+                                            </td>
+                                            <td className="py-2 pl-2 text-sm">
                                                 <div className="space-x-2">
                                                     <button
-                                                        onClick={(e) => {
+                                                        onClick={() => {
                                                             setEdit(true);
                                                             editAttd(a.id);
                                                         }}
@@ -258,47 +279,34 @@ const Attendance = ({
                     <Modal show={edit} maxWidth="lg">
                         <div className="p-4">
                             <div className="flex justify-between items-center">
-                                <h1 className="text-lg">Edit Attendace</h1>
-                                <button onClick={(e) => setEdit(false)}>
+                                <h1 className="text-lg">Edit Attendance</h1>
+                                <button onClick={() => setEdit(false)}>
                                     <FaXmark />
                                 </button>
                             </div>
                             <hr />
                             <div className="py-4">
-                                <form
-                                    onSubmit={handleUpdate}
-                                    className="space-y-3"
-                                >
+                                <form onSubmit={handleUpdate} className="space-y-3">
                                     <div className="flex flex-col text-sm gap-y-2">
                                         <label htmlFor="">Employee</label>
                                         <select
                                             name="employee_id"
                                             onChange={(e) =>
-                                                setData(
-                                                    "employee_id",
-                                                    e.target.value
-                                                )
+                                                setData("employee_id", e.target.value)
                                             }
                                             value={data.employee_id}
                                             className="form-select rounded text-sm"
                                         >
-                                            <option value="">
-                                                -- Select Employee --
-                                            </option>
+                                            <option value="">-- Select Employee --</option>
                                             {employees.map((emp, index) => (
-                                                <option
-                                                    key={index}
-                                                    value={emp.id}
-                                                >
+                                                <option key={index} value={emp.id}>
                                                     {emp.name}
                                                 </option>
                                             ))}
                                         </select>
                                     </div>
                                     <div className="flex flex-col text-sm gap-y-2">
-                                        <label htmlFor="">
-                                            Attandance Date
-                                        </label>
+                                        <label htmlFor="">Attendance Date</label>
                                         <input
                                             type="date"
                                             onChange={(e) =>
@@ -313,10 +321,7 @@ const Attendance = ({
                                         <input
                                             type="time"
                                             onChange={(e) =>
-                                                setData(
-                                                    "in_time",
-                                                    e.target.value
-                                                )
+                                                setData("in_time", e.target.value)
                                             }
                                             value={data.in_time}
                                             className="form-input rounded text-sm"
@@ -327,10 +332,7 @@ const Attendance = ({
                                         <input
                                             type="time"
                                             onChange={(e) =>
-                                                setData(
-                                                    "out_time",
-                                                    e.target.value
-                                                )
+                                                setData("out_time", e.target.value)
                                             }
                                             value={data.out_time}
                                             className="form-input rounded text-sm"
@@ -341,7 +343,7 @@ const Attendance = ({
                                             type="submit"
                                             className="py-2 px-5 rounded bg-blue-500 text-white"
                                         >
-                                            Update
+                                            Submit
                                         </button>
                                     </div>
                                 </form>

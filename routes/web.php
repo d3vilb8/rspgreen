@@ -38,6 +38,7 @@ use App\Http\Controllers\CommissionController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DesignatonController;
 use App\Http\Controllers\LeadSourceController;
+use App\Http\Controllers\OfficeTimeController;
 use App\Http\Controllers\DailyStatusController;
 use App\Http\Controllers\HolidayWorkController;
 use App\Http\Controllers\ChartAccountController;
@@ -239,6 +240,10 @@ Route::post('/approvetime/{id}', [EmployeeController::class, 'ApproveStatuschang
 Route::post('/rejectapprovetime/{id}', [EmployeeController::class, 'RejectStatuschange']);
 // Route::get('/employee-department', [EmployeeController::class, 'employeesetip']);
 Route::resource('branches', EmpolyeeSetupController::class);
+Route::post('/save-salary', [SalaryController::class, 'saveSalaryData']);
+Route::resource('office-times', OfficeTimeController::class);
+
+
 Route::post('branches-update/{id}', [EmpolyeeSetupController::class, 'update']);
 Route::resource('departments', DepartmentController::class);
 Route::resource('branches', EmpolyeeSetupController::class);

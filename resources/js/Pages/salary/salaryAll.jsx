@@ -1,7 +1,10 @@
+import React, { useState, useEffect } from "react";
+import jsPDF from "jspdf";
+import ReactDOMServer from "react-dom/server";
 import Header from "@/Layouts/Header";
 import Nav from "@/Layouts/Nav";
-import { useState, useEffect } from "react";
 import SalarySlip from "./SalarySlip";
+import Salarypdf from "./Salarypdf";
 
 const SalaryPage = ({
     user,
@@ -10,15 +13,13 @@ const SalaryPage = ({
     employees,
     salary,
     deductions,
-    deductionsss, // Passed from backend
-    combinedData
+    deductionsss,
+    combinedData,
 }) => {
     const [selectedEmployee, setSelectedEmployee] = useState("All Employees");
-    console.log("kjh",deductions)
     const [selectedMonth, setSelectedMonth] = useState("2025-01");
     const [filteredSalaries, setFilteredSalaries] = useState([]);
     const [selectedSalary, setSelectedSalary] = useState(null);
-    console.log("hhhh", setSelectedSalary);
 
     const nameMap = employees.reduce((acc, emp) => {
         acc[emp.id] = emp.name;
@@ -55,14 +56,45 @@ const SalaryPage = ({
         const filtered = salary.filter((sal) => {
             const matchesEmployee =
                 selectedEmployee === "All Employees" ||
-                nameMap[sal.employee_id] === selectedEmployee;
+                nameMap[sal?.employee_id] === selectedEmployee;
             const matchesMonth =
                 !selectedMonth || sal.generate_date.startsWith(selectedMonth);
             return matchesEmployee && matchesMonth;
         });
         setFilteredSalaries(filtered);
     };
+  
 
+    const generatePDF = (salaryData) => {
+        console.log("Salary Data:", salaryData); // Log the salary data
+    
+        // Create a new jsPDF instance
+        const doc = new jsPDF();
+    
+        // Convert Salarypdf component to static HTML
+        const salaryPdfHtml = ReactDOMServer.renderToStaticMarkup(
+            <Salarypdf
+            combinedData={[selectedSalary]}
+            deductions={deductions}
+            signatureName={selectedSalary?.employeeName}
+            salary={salary}
+            data={combinedData}
+            />
+        );
+    
+        console.log("Generated HTML for PDF:", salaryPdfHtml); // Log the generated HTML for debugging
+    
+        // Add the HTML content to the PDF document
+        doc.html(salaryPdfHtml, {
+            callback: function (doc) {
+                // Save the PDF
+                const fileName = `SalarySlip_${salaryData?.employeeName || "Employee"}.pdf`;
+                doc.save(fileName);
+            },
+            x: 10,
+            y: 10,
+        });
+    };
     return (
         <div className="flex flex-col w-full ml-[11.5rem]">
             <Header user={user} notif={notif} />
@@ -74,13 +106,9 @@ const SalaryPage = ({
                             <select
                                 className="border p-2 rounded"
                                 value={selectedEmployee}
-                                onChange={(e) =>
-                                    setSelectedEmployee(e.target.value)
-                                }
+                                onChange={(e) => setSelectedEmployee(e.target.value)}
                             >
-                                <option value="All Employees">
-                                    All Employees
-                                </option>
+                                <option value="All Employees">All Employees</option>
                                 {employees.map((emp) => (
                                     <option key={emp.id} value={emp.name}>
                                         {emp.name}
@@ -92,10 +120,14 @@ const SalaryPage = ({
                                 type="month"
                                 className="border p-2 rounded"
                                 value={selectedMonth}
-                                onChange={(e) =>
-                                    setSelectedMonth(e.target.value)
-                                }
+                                onChange={(e) => setSelectedMonth(e.target.value)}
                             />
+                            <button
+                                className="bg-blue-500 text-white p-2 rounded"
+                                onClick={handleSearch}
+                            >
+                                Search
+                            </button>
                         </div>
 
                         <table className="w-full border-collapse">
@@ -105,8 +137,6 @@ const SalaryPage = ({
                                     <th className="border p-2">Generate Date</th>
                                     <th className="border p-2">Status</th>
                                     <th className="border p-2">Total Amount</th>
-                                    {/* <th className="border p-2">Per Day Salary</th>
-                                    <th className="border p-2">Hourly Salary</th> */}
                                     <th className="border p-2">Action</th>
                                 </tr>
                             </thead>
@@ -117,23 +147,25 @@ const SalaryPage = ({
                                         <td className="border p-2">{sal.generate_date}</td>
                                         <td className="border p-2">{sal.status}</td>
                                         <td className="border p-2">{sal.total_amount}</td>
-                                        {/* <td className="border p-2">{sal.perDaySalary}</td>
-                                        <td className="border p-2">{sal.hourlySalary}</td> */}
                                         <td className="border p-2">
-                                            {/* Action button to open the details of the selected employee */}
                                             <button
-                                                className="bg-blue-500 text-white p-2 rounded"
+                                                className="bg-blue-500 text-white p-2 rounded mr-2"
                                                 onClick={() =>
                                                     setSelectedSalary({
                                                         ...sal,
-                                                        employeeName:
-                                                            nameMap[sal.employee_id],
+                                                        employeeName: nameMap[sal.employee_id],
                                                         deductions: deductionsss,
                                                     })
                                                 }
                                             >
                                                 View Details
                                             </button>
+                                            {/* <button
+                                                className="bg-green-500 text-white p-2 rounded"
+                                                onClick={() => generatePDF(sal)}
+                                            >
+                                                PDF Salary Slip
+                                            </button> */}
                                         </td>
                                     </tr>
                                 ))}
@@ -142,7 +174,7 @@ const SalaryPage = ({
                     </>
                 ) : (
                     <SalarySlip
-                        combinedData={[selectedSalary]} // Pass only the selected salary
+                        combinedData={[selectedSalary]}
                         deductions={deductions}
                         signatureName={selectedSalary.employeeName}
                         salary={salary}

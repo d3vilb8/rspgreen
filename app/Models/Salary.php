@@ -18,6 +18,7 @@ class Salary extends Model
 'approved_date',
 'approved_by',
 'total_amount',
-'allowance'
+'allowance',
+'additional_deduction'
     ];
 }
