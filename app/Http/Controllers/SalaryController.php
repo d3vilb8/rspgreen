@@ -99,7 +99,7 @@ class SalaryController extends Controller
                 'leave_management.edate as leave_end_date',
                 DB::raw('COALESCE(SUM(TIME_TO_SEC(attendances.total_time)) / 3600, 0) as total_time'),
                 DB::raw('COUNT(attendances.id) as total_working_days'), // Total working days
-                DB::raw('SUM(CASE WHEN TIME_TO_SEC(attendances.total_time) / 3600 < 9 THEN 1 ELSE 0 END) as late_days') // Late days count
+                DB::raw('SUM(CASE WHEN in_time > "10:00:00" THEN 1 ELSE 0 END) as late_days') // Late days count based on in_time after 10 AM
             )
             ->groupBy(
                 'employees.id',
@@ -117,40 +117,39 @@ class SalaryController extends Controller
             $leaveEnd = Carbon::parse($item->leave_end_date);
             $holidayStart = Carbon::parse($item->holiday_start_date);
             $holidayEnd = Carbon::parse($item->holiday_end_date);
-        
+    
             // Calculate total leave days (inclusive)
             $totalLeaveDays = $leaveStart->diffInDays($leaveEnd) + 1;
-        
+    
             // Adjust for holidays within the leave period
             $overlapStart = $leaveStart->max($holidayStart);
             $overlapEnd = $leaveEnd->min($holidayEnd);
             $holidayInLeavePeriod = $overlapStart <= $overlapEnd ? $overlapStart->diffInDays($overlapEnd) + 1 : 0;
-        
+    
             // If holiday is within the leave period, count it only once
             $adjustedLeaveDays = $totalLeaveDays;
-        
+    
             // Don't add an extra day if the holiday is on the same date as the leave's start or end
             if ($holidayStart->between($leaveStart, $leaveEnd) || $holidayEnd->between($leaveStart, $leaveEnd)) {
                 // Only add the holiday day if it falls within the leave period
                 $adjustedLeaveDays = $totalLeaveDays;
             }
-        
+    
             $perDaySalary = $item->basic_salary / 30; // Assuming 30 days in a month
             $leaveDeductionAmount = $perDaySalary * $adjustedLeaveDays;
-        
+    
             // Calculate late day deduction (1 day's salary for every 3 late days)
-            $lateDeductionDays = intdiv($item->late_days, 3);
+            $lateDeductionDays = intdiv($item->late_days, 3); // 1 day's salary for every 3 late days
             $lateDeductionAmount = $perDaySalary * $lateDeductionDays;
-        
+    
             // Add calculated fields to the item
             $item->adjusted_leave_days = $adjustedLeaveDays;
             $item->leave_deduction_amount = round($leaveDeductionAmount, 2);
             $item->late_deduction_days = $lateDeductionDays;
             $item->late_deduction_amount = round($lateDeductionAmount, 2);
-        
+    
             return $item;
         });
-        
     
         // Fetch all deductions
         $deductions = Deduction::all();
